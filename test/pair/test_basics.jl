@@ -5,9 +5,9 @@
 
 ##
 
-using ACE
+using ACE, ACEatoms, ACEbase
 using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
-using JuLIP: evaluate, evaluate_d
+using ACEbase: evaluate, evaluate_d
 using JuLIP.Potentials: i2z, numz
 
 randr() = 1.0 + rand()
@@ -21,8 +21,7 @@ rcut = 3.0
 
 trans = PolyTransform(1, r0)
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
-pB = ACE.PairPotentials.PolyPairBasis(Pr, :W)
-
+pB = PolyPairBasis(Pr, :W)
 
 ##
 
@@ -30,6 +29,7 @@ at = bulk(:W, cubic=true) * 3
 rattle!(at, 0.03)
 r0 = rnn(:W)
 X = copy(positions(at))
+
 
 E = energy(pB, at)
 println(@test length(E) == length(pB))
@@ -40,7 +40,7 @@ println(@test (length(F) == length(pB)) && all(length.(F) .==  length(at)))
 ##
 
 @info("test (de-)dictionisation of PairBasis")
-println(@test all(JuLIP.Testing.test_fio(pB)))
+println(@test all(ACEbase.Testing.test_fio(pB)))
 
 ##
 

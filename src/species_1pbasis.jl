@@ -37,9 +37,9 @@ Species1PBasisNeig(species) = Species1PBasisNeig(ZList(species, static=true))
 Base.length(basis::SpeciesBasis) = length(basis.zlist)^2
 
 ACE.evaluate!(B, tmp, basis::Species1PBasisCtr,
-          Xj::AbstractState, Xi::AbstractState) = evaluate!(B, tmp, basis, Xi)
+              cfg::AtomicEnvironment) = evaluate!(B, tmp, basis, cfg.X0)
 ACE.evaluate!(B, tmp, basis::Species1PBasisNeig,
-          Xj::AbstractState, Xi::AbstractState) = evaluate!(B, tmp, basis, Xj)
+              cfg::AtomicEnvironment) = evaluate!(B, tmp, basis, Xj)
 
 function ACE.evaluate!(B, tmp, basis::SpeciesBasis{NZ}, X) where {NZ}
    fill!(B, 0)

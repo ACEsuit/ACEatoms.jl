@@ -1,8 +1,12 @@
 
-
+import ACE
 export PolyPairBasis
 
 # TODO: allow PairBasis with different Pr for each z, z' combination
+
+# TODO: is this a hack???
+#       we could also introduce a private `cutoff` function in ACE.jl
+cutoff(J::ACE.TransformedPolys) = J.ru
 
 struct PolyPairBasis{TJ, NZ} <: IPBasis
    J::TJ
@@ -10,7 +14,7 @@ struct PolyPairBasis{TJ, NZ} <: IPBasis
    bidx0::SMatrix{NZ,NZ,Int}
 end
 
-fltype(pB::PolyPairBasis) = fltype(pB.J)
+JuLIP.fltype(pB::PolyPairBasis) = ACE.fltype(pB.J)
 
 Base.length(pB::PolyPairBasis) = length(pB.J) * (numz(pB) * (numz(pB) + 1)) ÷ 2
 Base.length(pB::PolyPairBasis, z0::AtomicNumber) = length(pB, z2i(pB, z0))
@@ -61,9 +65,6 @@ write_dict(pB::PolyPairBasis) = Dict(
           "Pr" => write_dict(pB.J),
        "zlist" => write_dict(pB.zlist) )
 
-read_dict(::Val{:SHIPs_PolyPairBasis}, D::Dict) =
-   read_dict(Val{:ACE_PolyPairBasis}(), D)
-
 read_dict(::Val{:ACE_PolyPairBasis}, D::Dict) =
       PolyPairBasis( read_dict(D["Pr"]), read_dict(D["zlist"]) )
 
@@ -103,7 +104,7 @@ function forces(pB::PolyPairBasis, at::Atoms{T}) where {T}
    tmp = alloc_temp_d(pB)
    for (i, j, R) in pairs(at, cutoff(pB))
       r = norm(R)
-      evaluate_d!(tmp.J, tmp.dJ, tmp.tmpd_J, pB.J, r)
+      evaluate_d!(tmp.dJ, tmp.tmpd_J, pB.J, r)
       idx0 = _Bidx0(pB, at.Z[i], at.Z[j])
       for n = 1:length(pB.J)
          F[i, idx0 + n] += 0.5 * tmp.dJ[n] * (R/r)
@@ -118,7 +119,7 @@ function virial(pB::PolyPairBasis, at::Atoms{T}) where {T}
    tmp = alloc_temp_d(pB)
    for (i, j, R) in pairs(at, cutoff(pB))
       r = norm(R)
-      evaluate_d!(tmp.J, tmp.dJ, tmp.tmpd_J, pB.J, r)
+      evaluate_d!(tmp.dJ, tmp.tmpd_J, pB.J, r)
       idx0 = _Bidx0(pB, at.Z[i], at.Z[j])
       for n = 1:length(pB.J)
          V[idx0 + n] -= 0.5 * (tmp.dJ[n]/r) * R * R'

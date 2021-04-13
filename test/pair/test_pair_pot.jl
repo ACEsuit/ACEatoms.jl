@@ -23,7 +23,7 @@ rcut = 3.0
 
 trans = PolyTransform(1, r0)
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
-pB = ACE.PairPotentials.PolyPairBasis(Pr, :W)
+pB = PairPotentials.PolyPairBasis(Pr, :W)
 coeffs = randcoeffs(pB)
 V = combine(pB, coeffs)
 

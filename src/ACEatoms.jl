@@ -1,26 +1,24 @@
 
 module ACEatoms
 
-using StaticArrays
+using StaticArrays, Reexport
 
-using ACE: AbstractState,
-           AbstractDiscreteState,
-           AbstractContinuousState,
-           AbstractConfiguration,
-           EuclideanVectorState,
+include("ext_imports.jl")
+
+using ACE: EuclideanVectorState,
            PolyTransform,
            transformed_jacobi
 
 export SpeciesState, PositionState
 
-include("julip_imports.jl")
 
 include("configs.jl")
 
-include("utils.jl")
+# include("utils.jl")
 
-include("species_1pbasis.jl")
+# include("species_1pbasis.jl")
 
 include("pairpots/pair.jl")
+@reexport using ACEatoms.PairPotentials
 
 end

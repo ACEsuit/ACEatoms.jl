@@ -57,7 +57,7 @@ evaluate!(tmp, V::PolyPairPot, r::Number, z, z0) =
       _dot_zij(V, evaluate!(tmp.J, tmp.tmp_J, V.basis.J, r), z, z0)
 
 evaluate_d!(tmp, V::PolyPairPot, r::Number, z, z0) =
-      _dot_zij(V, evaluate_d!(tmp.J, tmp.dJ, tmp.tmpd_J, V.basis.J, r), z, z0)
+      _dot_zij(V, evaluate_d!(tmp.dJ, tmp.tmpd_J, V.basis.J, r), z, z0)
 
 function evaluate!(tmp, V::PolyPairPot, r::Number)
    @assert numz(V) == 1

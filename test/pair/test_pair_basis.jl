@@ -6,10 +6,11 @@
 
 ##
 
-using ACE
+using ACE, ACEatoms
 using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
 using JuLIP: evaluate, evaluate_d
 using JuLIP.Potentials: i2z, numz
+
 
 randr() = 1.0 + rand()
 randcoeffs(B) = rand(length(B)) .* (1:length(B)).^(-2)
@@ -22,7 +23,7 @@ rcut = 3.0
 
 trans = PolyTransform(1, r0)
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
-pB = ACE.PairPotentials.PolyPairBasis(Pr, :W)
+pB = PairPotentials.PolyPairBasis(Pr, :W)
 
 @info("Scaling Test")
 println(@test ACE.scaling(pB, 1) == 1:length(pB))
