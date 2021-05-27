@@ -14,11 +14,13 @@ export SpeciesState, PositionState
 
 include("configs.jl")
 
-# include("utils.jl")
-
-# include("species_1pbasis.jl")
+include("species_1pbasis.jl")
 
 include("pairpots/pair.jl")
 @reexport using ACEatoms.PairPotentials
+
+
+include("utils.jl")
+
 
 end

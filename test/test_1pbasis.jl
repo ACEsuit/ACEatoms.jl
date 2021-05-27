@@ -1,3 +1,19 @@
+@testset "ACEatoms.jl" begin
+
+##
+
+using ACE, ACEatoms, JuLIP 
+using ACEatoms: Species1PBasis, ZμRnYlm_1pbasis, AtomState,
+                rand_environment
+using ACE: evaluate, evaluate_d, alloc_temp, alloc_B
+
+##
+Nat = 10
+B1p = ACEatoms.ZμRnYlm_1pbasis(; species = [:C, :O])
+ACE.init1pspec!(B1p)
+env = rand_environment(B1p, Nat)
+A1 = ACE.evaluate(B1p, env)
+A, dA = ACE.evaluate_ed(B1p, env)
 ##
 
 for species in (:X, :Si, [:C, :O, :H])

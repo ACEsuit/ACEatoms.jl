@@ -32,6 +32,10 @@ consistent with original ACE.
 struct AtomState{T} <: AbstractState
    mu::AtomicNumber
    rr::SVector{3, T}
+   # add other features here? 
+   # - charge 
+   # - dipole 
+   # ...
 end
 
 AtomState(mu, rr::AbstractVector{T}) where {T} =
@@ -44,10 +48,7 @@ Base.show(io::IO, X::AtomState) =
                PositionState(X.rr, "𝒓") ))
 
 
-abstract type AbstractAtomicEnvironment <: AbstractConfiguration end
-
-
-struct AtomicEnvironment{STT} <: AbstractAtomicEnvironment
+struct AtomicEnvironment{STT} <: AbstractConfiguration
    X0::STT   # state of center atom
    Xs::Vector{STT}  # states of neighbouring atoms
 end

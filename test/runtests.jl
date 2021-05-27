@@ -9,4 +9,7 @@ using Test
     include("pair/test_pair_pot.jl")
     include("pair/test_repulsion.jl")
 
+    # ----------------------
+    #   species 1p basis 
+    include("test_1pbasis.jl")
 end

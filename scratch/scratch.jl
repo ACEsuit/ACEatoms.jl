@@ -2,8 +2,8 @@ using ACE
 using ACE: alloc_temp, alloc_B, AtomState
 
 species = [:Ti, :Mo]
-Bμ0 = ACE.Species1PBasisCtr(species)
-Bμ1 = ACE.Species1PBasisNeig(species)
+Bμ0 = ACE.Species1PBasis(species)
+Bμ1 = ACE.Species1PBasisCtr(species)
 Rn = ACE.Rn1pBasis(ACE.Utils.radial_basis())
 Ylm = ACE.Ylm1pBasis(10)
 B1p = ACE.Product1pBasis( (Bμ0, Bμ1, Rn, Ylm) )
