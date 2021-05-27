@@ -38,6 +38,9 @@ struct AtomState{T} <: AbstractState
    # ...
 end
 
+import Base: + 
++(X::AtomState, u::SVector{3}) = AtomState(X.mu, X.rr + u)
+
 AtomState(mu, rr::AbstractVector{T}) where {T} =
    AtomState(AtomicNumber(mu), SVector{3, T}(rr...))
 AtomState(T::Type) = AtomState(0, zero(SVector{3, T}))

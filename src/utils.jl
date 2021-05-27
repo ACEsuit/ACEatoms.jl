@@ -20,6 +20,6 @@ function rand_environment(B1p, Nat::Integer)
    @assert Zμ isa Species1PBasis
    
    Xs = [ _rand_atstate(Zμ, Rn) for _ = 1:Nat ]
-   X0 = _rand_atstate(Zμ, Rn)
+   X0 = AtomState( rand(Zμ), 0 * rand_sphere() )
    return AtomicEnvironment(X0, Xs)
 end

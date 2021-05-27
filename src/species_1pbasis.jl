@@ -43,11 +43,19 @@ Base.length(basis::AbstractSpecies1PBasis) = length(basis.zlist)^2
 # ACE.evaluate!(B, tmp, basis::Species1PBasis,
 #               cfg::AtomicEnvironment) = evaluate!(B, tmp, basis, Xj)
 
-function ACE.evaluate!(B, tmp, basis::Species1PBasis{NZ}, X::AbstractState) where {NZ}
+function ACE.evaluate!(B, tmp, basis::Species1PBasis, X::AbstractState)
    fill!(B, 0)
    B[z2i(basis.zlist, X.mu)] = 1
    return B
 end
+
+# technically, this is the interface, but the Species1PBasis should never be
+# used outside the context of a product basis, and there it will always 
+# be called via ACE.evaluate!
+# function ACE.add_into_A!(A, tmp, basis::Species1PBasis{NZ}, X::AbstractState) where {NZ}
+#    A[z2i(basis.zlist, X.mu)] += 1
+#    return nothing
+# end
 
 ACE.fltype(::AbstractSpecies1PBasis) = Bool
 
