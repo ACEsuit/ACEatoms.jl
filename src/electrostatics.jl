@@ -29,10 +29,11 @@ function get_dipole(pos::Array, charges::Array, dipoles::Array, pbc::Bool=false)
 
 end
 
-function electrostatic_energy(pos::Array, charges::Array, dipoles::Array, pbc::Bool=false)
+function electrostatic_energy(pos::Array, charges::Array, dipoles::Array, λ::Type, pbc::Bool=false)
   """
     Total electrostatic enenrgy of a set of point charges and point dipoles
     calculated using the soft core potentials. 
+    λ = 1.0 returns the non-soft core version.
   """
   @assert pbc == false "Periodic boundary condition not yet supported"
   qq = 0
@@ -40,9 +41,9 @@ function electrostatic_energy(pos::Array, charges::Array, dipoles::Array, pbc::B
   μμ = 0
   for (i, R) in enumerate(pos)
     for j = (i+1):length(charges)
-      qq += soft_coulomb(R, charges[i], pos[j], charges[j])
-      qμ += soft_q_μ(R, charges[i], pos[j], dipoles[j])
-      μμ += soft_μ_μ(R, dipoles[i], pos[j], dipoles[j])
+      qq += soft_coulomb(R, charges[i], pos[j], charges[j], λ)
+      qμ += soft_q_μ(R, charges[i], pos[j], dipoles[j], λ)
+      μμ += soft_μ_μ(R, dipoles[i], pos[j], dipoles[j], λ)
     end
   end
   return qq + qμ + μμ
