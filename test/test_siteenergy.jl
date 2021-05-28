@@ -2,6 +2,8 @@
 
 @testset "ACESitePotential" begin 
 
+##
+
 using ACE, JuLIP, ACEatoms, ACEbase, Test, LinearAlgebra
 using ACE: evaluate, evaluate_d, SymmetricBasis, NaiveTotalDegree, PIBasis
 using ACEbase.Testing: fdtest
@@ -66,6 +68,28 @@ forces(V, at)
 @info("Finite-difference test on total energy")
 println(@test JuLIP.Testing.fdtest(V, at))
 
+##
+
+@info("Check also the ACESitePotentialBasis interface")
+
+ipbasis = ACEatoms.basis(V)
+
+@info("  ... energy")
+val1 = energy(V, at)
+val2 = sum(c .* energy(ipbasis, at))
+println(@test (val1 ≈ val2))
+
+@info("  ... forces")
+val1 = forces(V, at)
+frcB = forces(ipbasis, at)
+val2 = sum(c .* frcB)
+println(@test val1 ≈ val2)
+
+@info("  ... virial")
+val1 = virial(V, at)
+virB = virial(ipbasis, at)
+val2 = sum(c .* virB)
+println(@test val1 ≈ val2)
 
 ##
 

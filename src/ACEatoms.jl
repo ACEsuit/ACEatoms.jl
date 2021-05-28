@@ -24,5 +24,7 @@ include("utils.jl")
 
 include("siteenergy.jl")
 
+include("ad.jl")
+
 
 end
