@@ -39,11 +39,19 @@ JuLIP.alloc_temp(V::ACESitePotential, N::Integer) =
       )
 
 
-ACE.evaluate!(tmp, V::ACESitePotential, Rs, Zs, z0) = 
+evaluate!(tmp, V::ACESitePotential, Rs, Zs, z0) = 
       evaluate!(tmp.tmpmodel, V.model, environment(V, Rs, Zs, z0)).val
-   
-# evaluate_d!
-# alloc_temp
-# alloc_temp_d
+
+      
+alloc_temp_d(V::ACESitePotential, N::Integer) = 
+      ( JuLIP.Potentials.alloc_temp_site(N)...,
+        dV = zeros(JVec{Float64}, N), 
+        tmpdmodel = alloc_temp_d(V.model, N)
+      )
+
+evaluate_d!(dV, tmpd, V::ACESitePotential, Rs, Zs, z0) = 
+      ACE.grad_config!(dV, tmpd.tmpdmodel, V.model, 
+                      environment(V, Rs, Zs, z0))
+
 
 
