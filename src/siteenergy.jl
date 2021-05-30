@@ -32,7 +32,7 @@ end
 
 ACESiteCalc{ENV} = Union{ACESitePotential{ENV}, ACESitePotentialBasis{ENV}}
 
-Base.length(ipbasis::ACESitePotentialBasis) = sum(length, ipbasis.models)
+Base.length(ipbasis::ACESitePotentialBasis) = sum(length, values(ipbasis.models))
 
 cutoff(V::ACESiteCalc) =  maximum(cutoff, values(V.models))
 
@@ -77,7 +77,7 @@ evaluate!(tmp, V::ACESitePotential, Rs, Zs, z0) =
       evaluate!(tmp.tmpmodel[z0], V.models[z0], environment(V, Rs, Zs, z0)).val
 
 function evaluate!(B, tmp, V::ACESitePotentialBasis, Rs, Zs, z0) 
-   fill!(B, 0)
+   # fill!(B, 0)
    Bview = (@view B[V.inds[z0]])
    evaluate!(Bview, tmp.tmpmodel[z0], V.models[z0], environment(V, Rs, Zs, z0))
    return B 

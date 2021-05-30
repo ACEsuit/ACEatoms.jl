@@ -76,24 +76,25 @@ println(@test JuLIP.Testing.fdtest(V, at))
 @info("Check also the ACESitePotentialBasis interface")
 
 ipbasis = ACEatoms.basis(V)
+cc = [cTi; cAl]
 
-energy(ipbasis, at)
+# check get_params, set_params
 
 @info("  ... energy")
 val1 = energy(V, at)
-val2 = sum(c .* energy(ipbasis, at))
+val2 = sum(cc .* energy(ipbasis, at))
 println(@test (val1 ≈ val2))
 
 @info("  ... forces")
 val1 = forces(V, at)
 frcB = forces(ipbasis, at)
-val2 = sum(c .* frcB)
+val2 = sum(cc .* frcB)
 println(@test val1 ≈ val2)
 
 @info("  ... virial")
 val1 = virial(V, at)
 virB = virial(ipbasis, at)
-val2 = sum(c .* virB)
+val2 = sum(cc .* virB)
 println(@test val1 ≈ val2)
 
 ##
