@@ -68,7 +68,7 @@ indexrange(basis::Species1PBasisCtr) = Dict( :μ0 => Int.(basis.zlist.list) )
 isadmissible(b, basis::Species1PBasis) = (AtomicNumber(b.μ) in basis.zlist.list)
 isadmissible(b, basis::Species1PBasisCtr) = (AtomicNumber(b.μ0) in basis.zlist.list)
 
-degree(b, basis::AbstractSpecies1PBasis) = 0
+degree(b, basis::AbstractSpecies1PBasis, args...) = 0
 
 get_index(basis::Species1PBasis, b) = z2i(basis.zlist, AtomicNumber(b.μ))
 get_index(basis::Species1PBasisCtr, b) = z2i(basis.zlist, AtomicNumber(b.μ0))

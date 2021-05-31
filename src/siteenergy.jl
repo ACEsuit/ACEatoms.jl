@@ -45,14 +45,20 @@ end
 ACESitePotential(models::Dict{AtomicNumber, TM}, ENV = AtomicEnvironment) where {TM} = 
      ACESitePotential{ENV, TM}(models)
 
-function basis(V::ACESitePotential{ENV}) where ENV 
-   models = Dict( [sym => model.basis for (sym, model) in V.models]... )
+function _get_basisinds(V::ACESitePotential)
    inds = Dict{AtomicNumber, UnitRange{Int}}()
    i0 = 0
-   for (z, mo) in models
-      inds[z] = (i0+1):(i0+length(mo))
-      i0 += length(mo)
+   for (z, mo) in V.models
+      len = length(mo.basis)
+      inds[z] = (i0+1):(i0+len)   # to generalize for general models
+      i0 += len
    end
+   return inds 
+end
+
+function basis(V::ACESitePotential{ENV}) where ENV 
+   models = Dict( [sym => model.basis for (sym, model) in V.models]... )
+   inds = _get_basisinds(V)
    return ACESitePotentialBasis{ENV, valtype(models)}(models, inds)
 end
 
@@ -102,4 +108,10 @@ end
                 
                 
 
-
+function ACE.set_params!(V::ACESitePotential, c::AbstractVector)
+   inds = _get_basisinds(V)
+   for (z, mo) in V.models
+      ACE.set_params!(V.models[z], c[inds[z]])
+   end
+   return V
+end

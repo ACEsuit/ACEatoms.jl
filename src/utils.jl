@@ -3,7 +3,7 @@
 using ACE.Random: rand_radial, rand_sphere
 
 function ZμRnYlm_1pbasis(; species = nothing, kwargs...)
-   RnYlm = ACE.Utils.RnYlm_1pbasis(; kwargs...)
+   RnYlm = ACE.Utils.RnYlm_1pbasis(; init=false, kwargs...)
    Zμ = Species1PBasis(species)
    return Zμ * RnYlm
 end
@@ -23,3 +23,5 @@ function rand_environment(B1p, Nat::Integer)
    X0 = AtomState( rand(Zμ), 0 * rand_sphere() )
    return AtomicEnvironment(X0, Xs)
 end
+
+
