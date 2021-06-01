@@ -1,10 +1,10 @@
 """
-`module Electro`
+`module Electrostatics`
 
 This module implements various functions related to (long range) electrostatic interactions
 """
 
-module Electro
+module Electrostatics
 
 using LinearAlgebra
 

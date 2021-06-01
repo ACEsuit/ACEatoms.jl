@@ -19,7 +19,7 @@ ord = 3
 species = [:Ti, :Al]
 B1p = ACEatoms.ZμRnYlm_1pbasis(; species = species, maxdeg=maxdeg, D = D, 
                                  rin = 1.2, rcut = 5.0)
-ACE.init1pspec!(B1p)
+ACE.init1pspec!(B1p, maxdeg = maxdeg, Deg = ACE.NaiveTotalDegree())
 φ = ACE.Invariant()
 pibasis = PIBasis(B1p, ord, maxdeg; property = φ)
 basis = SymmetricBasis(pibasis, φ)
