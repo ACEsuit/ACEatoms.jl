@@ -61,7 +61,7 @@ function soft_coulomb(pos1::AbstractVector, q1::Real, pos2::AbstractVector, q2::
   return λ * q1 * q2 / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^0.5) * e * 1e10
 end
 
-function soft_q_μ(pos1::AbstractVector, q1::Real, pos2::AbstractVector, μ::AbstractVector, λ::Real=0.9, α::Real=10.0)
+function soft_q_μ(pos1::AbstractVector, q1::Real, pos2::AbstractVector, μ::AbstractArray, λ::Real=0.9, α::Real=10.0)
   """
     Soft core Coulomb interaction between point charge and point dipole
     If λ=1.0 the normal Coulomb is returned
@@ -72,7 +72,7 @@ function soft_q_μ(pos1::AbstractVector, q1::Real, pos2::AbstractVector, μ::Abs
   return λ * q1 * r12 ⋅ μ / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^1.5) *1e10^2 * (1e-21/c_light)
 end
 
-function soft_μ_μ(pos1::AbstractVector, μ1::AbstractVector, pos2::AbstractVector, μ2::AbstractVector, λ::Real=0.9, α::Real=10.0)
+function soft_μ_μ(pos1::AbstractVector, μ1::AbstractArray, pos2::AbstractVector, μ2::AbstractArray, λ::Real=0.9, α::Real=10.0)
   """
     Soft core Coulomb interaction between two point dipoles
     If λ=1.0 the normal Coulomb is returned
