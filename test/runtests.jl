@@ -14,4 +14,8 @@ using Test
     include("test_1pbasis.jl")
     #   basic site energy calculator
     include("test_siteenergy.jl")
+
+    # ---------------------- 
+    #  special physics 
+    include("test_electro.jl")
 end

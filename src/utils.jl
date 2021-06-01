@@ -2,10 +2,14 @@
 
 using ACE.Random: rand_radial, rand_sphere
 
-function ZμRnYlm_1pbasis(; species = nothing, kwargs...)
-   RnYlm = ACE.Utils.RnYlm_1pbasis(; init=false, kwargs...)
+function ZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = Inf, Deg = ACE.NaiveTotalDegree(), kwargs...)
+   RnYlm = ACE.Utils.RnYlm_1pbasis(; init=false, D = Deg, kwargs...)
    Zμ = Species1PBasis(species)
-   return Zμ * RnYlm
+   B1p = Zμ * RnYlm
+   if init 
+      ACE.init1pspec!(B1p; maxdeg = maxdeg, Deg = Deg)
+   end
+   return B1p
 end
 
 _rand_atstate(Zμ, Rn) = 

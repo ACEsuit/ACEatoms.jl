@@ -18,7 +18,6 @@ notdot(a::Number, b::Number) = a * b
 @info("Basic evaluation test for debugging")
 Nat = 2
 B1p = ACEatoms.ZμRnYlm_1pbasis(; species = [:C,:O])
-ACE.init1pspec!(B1p)
 env = rand_environment(B1p, Nat)
 A1 = ACE.evaluate(B1p, env)
 A, dA = ACE.evaluate_ed(B1p, env)
@@ -32,7 +31,6 @@ println(@test(eltype(dA) <: SVector))
 for species in (:X, :Si, [:Ti, :Al], [:C, :H, :O])
    @info("    species $(species)")
    B1p = ACEatoms.ZμRnYlm_1pbasis(; species = species)
-   ACE.init1pspec!(B1p)
    # test deserialization
    # TODO Testing.test_fio
 
