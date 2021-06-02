@@ -27,5 +27,6 @@ include("siteenergy.jl")
 
 # include("ad.jl")
 
+include("dipole.jl")
 
 end

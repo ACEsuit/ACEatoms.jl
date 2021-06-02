@@ -18,4 +18,5 @@ using Test
     # ---------------------- 
     #  special physics 
     include("test_electro.jl")
+    include("test_dip.jl")
 end
