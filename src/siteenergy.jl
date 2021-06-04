@@ -99,12 +99,6 @@ alloc_temp_d(V::ACESiteCalc, env::AbstractConfiguration) =
         tmpdmodel = Dict([ z => alloc_temp_d(mo, env) for (z, mo) in V.models ]...)
       )
 
-alloc_temp_d(V::ACESiteCalc, env::AbstractConfiguration) = 
-      ( JuLIP.Potentials.alloc_temp_site(length(env))...,
-        dV = zeros(JVec{Float64}, length(env)), 
-        tmpdmodel = Dict([ z => alloc_temp_d(mo, env) for (z, mo) in V.models ]...)
-      )
-
 import ACEbase
 function ACEbase.evaluate_d(V::ACESiteCalc, Rs::AbstractVector{JVec{T}}, Zs, z0) where {T} 
    env = environment(V, Rs, Zs, z0)
@@ -128,6 +122,17 @@ function evaluate_d!(dB, _tmpd, V::ACESitePotentialBasis, Rs, Zs, z0)
 end
                 
                 
+
+ACE.nparams(V::ACESitePotential) = sum(ACE.nparams, values(V.models))
+
+function ACE.params(V::ACESitePotential) 
+   inds = _get_basisinds(V)
+   c = zeros(ACE.nparams(V))
+   for (z, mo) in V.models 
+      c[inds[z]] .= ACE.params(mo)
+   end
+   return c 
+end 
 
 function ACE.set_params!(V::ACESitePotential, c::AbstractVector)
    inds = _get_basisinds(V)
