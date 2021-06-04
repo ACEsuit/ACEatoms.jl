@@ -13,7 +13,7 @@ function ZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = Inf, Deg = 
 end
 
 _rand_atstate(Zμ, Rn) = 
-      AtomState( rand(Zμ), rand_radial(Rn) * rand_sphere())
+      AtomState{Float64}(mu = rand(Zμ), rr = rand_radial(Rn) * rand_sphere() )
 
 
 function rand_environment(B1p, Nat::Integer)
@@ -24,7 +24,7 @@ function rand_environment(B1p, Nat::Integer)
    @assert Zμ isa Species1PBasis
    
    Xs = [ _rand_atstate(Zμ, Rn) for _ = 1:Nat ]
-   X0 = AtomState( rand(Zμ), 0 * rand_sphere() )
+   X0 = AtomState{Float64}( mu = rand(Zμ) )
    return AtomicEnvironment(X0, Xs)
 end
 

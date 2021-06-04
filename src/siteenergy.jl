@@ -69,9 +69,13 @@ function environment(V::ACESiteCalc{<: AtomicEnvironment},
    return environment(V, Rs, Zs, z0), Js
 end
 
+atomstate(z::AtomicNumber) = AtomState{Float64}( (mu = z,) )
+atomstate(z::AtomicNumber, rr::SVector{3, T}) where {T} = 
+      AtomState{T}( (mu = z, rr = rr) )
+
 environment(V::ACESiteCalc{<: AtomicEnvironment}, 
             Rs::AbstractVector, Zs::AbstractVector, z0::AtomicNumber) = 
-      AtomicEnvironment( AtomState(z0), AtomState.(Zs, Rs) )
+      AtomicEnvironment( atomstate(z0), atomstate.(Zs, Rs) )
 
 
 JuLIP.alloc_temp(V::ACESiteCalc, N::Integer) = 
@@ -89,21 +93,38 @@ function evaluate!(B, tmp, V::ACESitePotentialBasis, Rs, Zs, z0)
    return B 
 end
 
-
-alloc_temp_d(V::ACESiteCalc, N::Integer) = 
-      ( JuLIP.Potentials.alloc_temp_site(N)...,
-        dV = zeros(JVec{Float64}, N), 
-        tmpdmodel = Dict([ z => alloc_temp_d(mo, N) for (z, mo) in V.models ]...)
+alloc_temp_d(V::ACESiteCalc, env::AbstractConfiguration) = 
+      ( JuLIP.Potentials.alloc_temp_site(length(env))...,
+        dV = zeros(JVec{Float64}, length(env)), 
+        tmpdmodel = Dict([ z => alloc_temp_d(mo, env) for (z, mo) in V.models ]...)
       )
 
-evaluate_d!(dV, tmpd, V::ACESitePotential, Rs, Zs, z0) = 
-      ACE.grad_config!(dV, tmpd.tmpdmodel[z0], V.models[z0], environment(V, Rs, Zs, z0))
+alloc_temp_d(V::ACESiteCalc, env::AbstractConfiguration) = 
+      ( JuLIP.Potentials.alloc_temp_site(length(env))...,
+        dV = zeros(JVec{Float64}, length(env)), 
+        tmpdmodel = Dict([ z => alloc_temp_d(mo, env) for (z, mo) in V.models ]...)
+      )
 
-function evaluate_d!(dB, tmpd, V::ACESitePotentialBasis, Rs, Zs, z0)
+import ACEbase
+function ACEbase.evaluate_d(V::ACESiteCalc, Rs::AbstractVector{JVec{T}}, Zs, z0) where {T} 
+   env = environment(V, Rs, Zs, z0)
+   tmpd = alloc_temp_d(V, env)
+   ACE.grad_config!(tmpd.dV, tmpd.tmpdmodel[z0], V.models[z0], env)
+end
+
+function evaluate_d!(dV, _tmpd, V::ACESitePotential, Rs, Zs, z0) 
+   env = environment(V, Rs, Zs, z0)
+   tmpd = alloc_temp_d(V.models[z0], env)
+   return ACE.grad_config!(dV, tmpd, V.models[z0], env)
+end
+
+function evaluate_d!(dB, _tmpd, V::ACESitePotentialBasis, Rs, Zs, z0)
    fill!(dB, zero(eltype(dB)))
-   dBview = (@view dB[V.inds[z0], :])
-   evaluate_d!(dBview, tmpd.tmpdmodel[z0], V.models[z0], environment(V, Rs, Zs, z0))
-   return dB
+   dBview = (@view dB[V.inds[z0], 1:length(Rs)])
+   env = environment(V, Rs, Zs, z0)
+   tmpd = alloc_temp_d(V.models[z0], env)
+   evaluate_d!(dBview, tmpd, V.models[z0], env)
+   return dBview
 end
                 
                 

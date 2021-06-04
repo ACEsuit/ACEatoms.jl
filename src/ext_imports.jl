@@ -30,8 +30,10 @@ import ACEbase: alloc_temp, alloc_temp_d,
                 combine,
                 ScalarACEBasis, _allfieldsequal
 
+import ACE
 import ACE: AbstractState,
             AbstractDiscreteState,
             AbstractContinuousState,
             AbstractConfiguration,
-            scaling 
+            scaling, PolyTransform, 
+            transformed_jacobi

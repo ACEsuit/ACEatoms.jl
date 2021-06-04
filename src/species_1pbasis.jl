@@ -59,6 +59,9 @@ end
 
 ACE.fltype(::AbstractSpecies1PBasis) = Bool
 
+ACE.gradtype(basis::Species1PBasis, X::AbstractState) = 
+         ACE.dstate_type(fltype(basis), X)
+
 symbols(::Species1PBasis) = [:μ]
 symbols(::Species1PBasisCtr) = [:μ0]
 

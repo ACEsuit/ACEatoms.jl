@@ -3,52 +3,19 @@
 
 # --------------------- Atom related States
 
+import Base: promote_rule, *, +, real
 
-"same as EuclideanVectorState"
-const PositionState{T} = EuclideanVectorState{T}
-
-@doc raw"""
-`struct SpeciesState` : a $\mathbb{Z}$ value, which is invariant under the
-rotation group. It defines an atomic species.
-"""
-struct SpeciesState <: AbstractDiscreteState
-   mu::AtomicNumber
-   label::String
-   SpeciesState(z_or_sym, label::String = "") =
-         new(AtomicNumber(z_or_sym), label)
-end
-
-SpeciesState(label::String = "") = SpeciesState(AtomicNumber(0), label)
-
-Base.show(io::IO, s::SpeciesState) =
-      print(io, "$(s.label)[$(chemical_symbol(s.mu))]")
+const AtomState{T} = ACE.State{(:mu, :rr), Tuple{AtomicNumber, SVector{3, T}}} 
 
 
+*(A::AbstractMatrix, X::AtomState{T}) where {T} = DAtomState{T}( (rr = A * X.rr,) )
 
-"""
-`struct AtomState` : basic implementation of the state of an Atom
-consistent with original ACE.
-"""
-struct AtomState{T} <: AbstractState
-   mu::AtomicNumber
-   rr::SVector{3, T}
-   # add other features here? 
-   # - charge 
-   # - dipole 
-   # ...
-end
++(X::TX, u::SVector{3}) where {TX <: AtomState} = TX( (rr = X.rr + u, mu = X.mu) )
++(u::SVector{3}, X::TX) where {TX <: ACE.DState{(:rr,)}} = u + X.rr
 
-import Base: + 
-+(X::AtomState, u::SVector{3}) = AtomState(X.mu, X.rr + u)
+real(X::AtomState{T}) where {T} = 
+      AtomState{real(T)}( (rr = real.(X.rr), mu = X.mu) )
 
-AtomState(mu, rr::AbstractVector{T}) where {T} =
-   AtomState(AtomicNumber(mu), SVector{3, T}(rr...))
-AtomState(T::Type) = AtomState(0, zero(SVector{3, T}))
-AtomState(mu = 0, T::Type = Float64) = AtomState(mu, zero(SVector{3, T}))
-
-Base.show(io::IO, X::AtomState) =
-   print(io, ( SpeciesState(X.mu, "μ"),
-               PositionState(X.rr, "𝒓") ))
 
 
 struct AtomicEnvironment{STT} <: AbstractConfiguration

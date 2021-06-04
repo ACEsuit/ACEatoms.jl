@@ -23,7 +23,6 @@ A1 = ACE.evaluate(B1p, env)
 A, dA = ACE.evaluate_ed(B1p, env)
 println(@test(A ≈ A1))
 println(@test(size(dA) == (length(A), Nat)))
-println(@test(eltype(dA) <: SVector))
 
 ##
 
@@ -33,6 +32,7 @@ for species in (:X, :Si, [:Ti, :Al], [:C, :H, :O])
    B1p = ACEatoms.ZμRnYlm_1pbasis(; species = species)
    # test deserialization
    # TODO Testing.test_fio
+   _rrval(x) = x.rr
 
    for ntest = 1:20
       Nat = rand(5:15)
@@ -40,7 +40,7 @@ for species in (:X, :Si, [:Ti, :Al], [:C, :H, :O])
       Us = randn(SVector{3, Float64}, Nat)
       c = randn(length(B1p))
       F = t -> notdot(c, ACE.evaluate(B1p, inc_env(env, t * Us)))
-      dF = t -> notdot(sum(Diagonal(c) * ACE.evaluate_ed(B1p, inc_env(env, t*Us))[2], dims = (1,))[:], Us)
+      dF = t -> notdot( _rrval.(sum(Diagonal(c) * ACE.evaluate_ed(B1p, inc_env(env, t*Us))[2], dims = (1,))[:]), Us)
       print_tf(@test(all(ACEbase.Testing.fdtest(F, dF, 0.0; verbose=false))))
    end
    println()

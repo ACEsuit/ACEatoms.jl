@@ -59,7 +59,7 @@ energy(V, at)
 @info("Test that grad_config(model) ≈ evaluate_d(site-potential)")
 dEs = zeros(JVecF, length(env))
 dv1 = ACE.grad_config!(dEs, ACE.alloc_temp_d(V.models[z0], env), V.models[z0], env)
-dv2 = JuLIP.evaluate_d!(dEs, ACE.alloc_temp_d(V, length(env)), V, Rs, Zs, z0)
+dv2 = JuLIP.evaluate_d!(dEs, ACE.alloc_temp_d(V, env), V, Rs, Zs, z0)
 dv3 = evaluate_d(V, Rs, Zs, z0)
 
 println(@test(dv1 ≈ dv2))
