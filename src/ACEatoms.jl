@@ -11,6 +11,7 @@ using ACE: EuclideanVectorState,
 
 export SpeciesState, PositionState
 
+import JuLIP: dipole
 
 include("configs.jl")
 
