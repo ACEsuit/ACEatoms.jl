@@ -30,15 +30,17 @@ Returns:
 """
 function get_dipole(pos::AbstractArray, charges::AbstractVector, dipoles::AbstractArray, pbc::Bool=false)
   @assert pbc == false "Periodic boundary condition not yet supported"
-  return sum(pos .* charges .* (1e-11/c_light/e) .+ dipoles, dims=1)
+  return sum(charges .* pos .* (1e-11/c_light/e) .+ dipoles, dims=1)
 end
 
-
-#abstract type Fixed_q_dipole{T} end
-
-struct Fixed_q_dipole{T} #<: Fixed_q_dipole{T} 
+struct Fixed_q_dipole{T} 
   x::T  
 end
+
+#Dict(A::Fixed_q_dipole) = Base.Dict( "__id__" -> "Fixed_q_ref",
+#                               "x" -> A.x )
+#Fixed_q_dipole(D::Base.Dict) = A(D["x"])
+#Base.convert(::Val{:Electrostatics.Fixed_q_dipole}, ::Dict) 
 
 """
 Total electrostatic enenrgy of a set of point charges and point dipoles
