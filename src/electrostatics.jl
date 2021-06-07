@@ -8,8 +8,10 @@ module Electrostatics
 
 using LinearAlgebra
 using Zygote
+using JuLIP
 
-export get_dipole, electrostatic_energy, soft_coulomb, soft_q_μ, soft_μ_μ, soft_q_μ2
+export get_dipole, electrostatic_energy, soft_coulomb, 
+        soft_q_μ, soft_μ_μ, soft_q_μ2, dipole, Fixed_q_dipole
 
 const μ_0 = 4.0e-7 * π
 const c = 299792458.0
@@ -29,6 +31,13 @@ Returns:
 function get_dipole(pos::AbstractArray, charges::AbstractVector, dipoles::AbstractArray, pbc::Bool=false)
   @assert pbc == false "Periodic boundary condition not yet supported"
   return sum(pos .* charges .* (1e-11/c_light/e) .+ dipoles, dims=1)
+end
+
+
+#abstract type Fixed_q_dipole{T} end
+
+struct Fixed_q_dipole{T} #<: Fixed_q_dipole{T} 
+  x::T  
 end
 
 """

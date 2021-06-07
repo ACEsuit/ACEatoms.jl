@@ -1,5 +1,7 @@
 
 using JuLIP: neighbourlist, cutoff
+using ACEatoms.Electrostatics: Fixed_q_dipole
+using JuLIP
 
 _myreal(mu::ACE.EuclideanVector) = real.(mu.val)
 
@@ -29,5 +31,20 @@ function dipole(B::ACESitePotentialBasis, at::Atoms)
    return MU
 end
 
+"""
+JuLIP dipole calculator returning the dipole moment of the atomic charges
+"""
+function dipole(Vref::Fixed_q_dipole, at::Atoms)
+  Q = get_data(at, :Q)::Vector{Float64}
+  return sum(Q .* positions(at))
+end
+
+function dipole(IP::JuLIP.MLIPs.SumIP{Any}, at::Atoms{Float64})
+   mu = zeros(SVector{3, Float64})
+   for pot in IP.components
+      mu += dipole(pot, at)
+   end
+   return mu
+end
 
 
