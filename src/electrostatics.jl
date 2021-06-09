@@ -20,6 +20,18 @@ const e = 1.602176634e-19
 const c_light = 299792458
 
 """
+  JuLIP calculator using a dipole ACE model to calculate the soft core Coulomb Q-Q, Q-μ, μ-μ 
+  energies and forces
+"""
+
+struct ESPot{TEV} <: AbstractCalculator 
+  dipoleevaluator::TEV
+end
+
+#energy(V::ESPot, at::AToms) = ... # get dipoles with dipole evaluator, and than get energy
+#forces
+
+"""
 Get the overall dipole moment of a set of oint charges and point dipoles
 Arguments:
   pos::Array natoms x 3 Array
@@ -33,14 +45,14 @@ function get_dipole(pos::AbstractArray, charges::AbstractVector, dipoles::Abstra
   return sum(charges .* pos .* (1e-11/c_light/e) .+ dipoles, dims=1)
 end
 
-struct Fixed_q_dipole{T} 
-  x::T  
-end
+"""
+Fixed charge (or dipole) reference potential
+"""
+struct FixedChargeDipole end
 
-#Dict(A::Fixed_q_dipole) = Base.Dict( "__id__" -> "Fixed_q_ref",
-#                               "x" -> A.x )
-#Fixed_q_dipole(D::Base.Dict) = A(D["x"])
-#Base.convert(::Val{:Electrostatics.Fixed_q_dipole}, ::Dict) 
+write_dict(::FixedChargeDipole) = Dict("__id__" => "ACEatoms_FixedChargeDipole")
+
+read_dict(::Val{:ACEatoms_FixedChargeDipole}, D::Dict) = FixedChargeDipole()
 
 """
 Total electrostatic enenrgy of a set of point charges and point dipoles
@@ -67,9 +79,11 @@ Soft core Coulomb interaction between two point charges
 If λ=1.0 the normal Coulomb is returned
 Adapted from LAMMPS `pair_style coul/long/soft`
 """
+
+# TODO one single r_ij argument for forces
 function soft_coulomb(pos1::AbstractVector, q1::Real, pos2::AbstractVector, q2::Real, λ::Real=0.9, α::Real=10.0)
   r = norm(pos1 - pos2)
-  return λ * q1 * q2 / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^0.5) * e * 1e10
+  return q1 * q2 / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^0.5) * e * 1e10
 end
 
 function force_q_q(pos1::AbstractVector, q1::Real, pos2::AbstractVector, q2::Real, λ::Real=0.9, α::Real=10.0)
@@ -84,7 +98,7 @@ Analogously defined to LAMMPS `pair_style coul/long/soft`
 function soft_q_μ(pos1::AbstractVector, q1::Real, pos2::AbstractVector, μ::AbstractArray, λ::Real=0.9, α::Real=10.0)
   r12 = pos1 - pos2
   r = norm(r12)
-  return λ * q1 * sum(r12 .* μ) / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^1.5) *1e10^2 * (1e-21/c_light)
+  return q1 * sum(r12 .* μ) / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^1.5) *1e10^2 * (1e-21/c_light)
 end
 
 function force_q_μ(pos1::AbstractVector, q1::Real, pos2::AbstractVector, μ::AbstractArray, λ::Real=0.9, α::Real=10.0)
@@ -99,7 +113,7 @@ Analogously defined to LAMMPS `pair_style coul/long/soft`
 function soft_μ_μ(pos1::AbstractVector, μ1::AbstractArray, pos2::AbstractVector, μ2::AbstractArray, λ::Real=0.9, α::Real=10.0)
   r12 = pos1 - pos2
   r = norm(r12)
-  return λ / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^1.5) * (sum(μ1 .* μ2) - 3 * (sum(μ1 .* r12)) * (sum(r12 .* μ2)) / (α * (1 - λ)^2 + r^2)) *1e10^3 * (1e-21/c_light)^2 / e 
+  return 1 / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^1.5) * (sum(μ1 .* μ2) - 3 * (sum(μ1 .* r12)) * (sum(r12 .* μ2)) / (α * (1 - λ)^2 + r^2)) *1e10^3 * (1e-21/c_light)^2 / e 
 end
 
 function force_μ_μ(pos1::AbstractVector, μ1::AbstractArray, pos2::AbstractVector, μ2::AbstractArray, λ::Real=0.9, α::Real=10.0)
