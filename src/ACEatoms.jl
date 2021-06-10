@@ -11,7 +11,7 @@ using ACE: EuclideanVectorState,
 
 export SpeciesState, PositionState
 
-import JuLIP: dipole
+import JuLIP: dipole, energy, forces
 
 include("configs.jl")
 
@@ -21,6 +21,7 @@ include("pairpots/pair.jl")
 @reexport using ACEatoms.PairPotentials
 
 include("electrostatics.jl")
+@reexport using ACEatoms.Electrostatics
 
 include("utils.jl")
 

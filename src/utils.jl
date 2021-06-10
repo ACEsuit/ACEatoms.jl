@@ -1,6 +1,8 @@
 
-
 using ACE.Random: rand_radial, rand_sphere
+
+import ACE: PolyTransform, transformed_jacobi
+import ACEatoms: PolyPairBasis
 
 function ZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = Inf, Deg = ACE.NaiveTotalDegree(), kwargs...)
    RnYlm = ACE.Utils.RnYlm_1pbasis(; init=false, D = Deg, kwargs...)
@@ -28,4 +30,18 @@ function rand_environment(B1p, Nat::Integer)
    return AtomicEnvironment(X0, Xs)
 end
 
+function pair_basis(; species = :X,
+   # transform parameters
+   r0 = 2.5,
+   trans = PolyTransform(2, r0),
+   # degree parameters
+   maxdeg = 8,
+   # radial basis parameters
+   rcut = 5.0,
+   rin = 0.5 * r0,
+   pcut = 2,
+   pin = 0,
+   rbasis = transformed_jacobi(maxdeg, trans, rcut, rin; pcut=pcut, pin=pin))
 
+return PolyPairBasis(rbasis, species)
+end
