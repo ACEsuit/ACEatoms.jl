@@ -11,6 +11,7 @@ using Zygote
 using JuLIP
 using StaticArrays
 using ACEatoms
+import JuLIP: energy, forces
 
 export get_dipole, electrostatic_energy, electrostatic_forces, soft_coulomb, 
         soft_q_μ, soft_μ_μ, soft_q_μ2, dipole, FixedChargeDipole, energy, forces
@@ -37,7 +38,7 @@ function energy(V::ESPot, at::Atoms)
   if has_data(at, :Q)
     Qs = get_data(at, :Q)::Vector{Float64} 
   end
-  return electrostatic_energy(pos, Qs, mus, 0.5)  # Set λ=0.5 as a default, may need to change later
+  return electrostatic_energy(pos, Qs, mus, 0.0)  # Set λ=0.5 as a default, may need to change later
 end
 
 function forces(V::ESPot, at::Atoms) 
@@ -48,7 +49,7 @@ function forces(V::ESPot, at::Atoms)
   if has_data(at, :Q)
     Qs = get_data(at, :Q)::Vector{Float64} 
   end  
-  return electrostatic_forces(pos, Qs, mus, 0.5)
+  return electrostatic_forces(pos, Qs, mus, 0.0)
 end
 
 
@@ -103,7 +104,7 @@ calculated using the soft core potentials.
 """
 function electrostatic_forces(pos::AbstractArray, charges::AbstractVector, dipoles::AbstractArray, λ::Real, pbc::Bool=false)
   @assert pbc == false "Periodic boundary condition not yet supported"
-  Fs = zeros(SVector{3}, length(charges))
+  Fs = zeros(JVec{Float64}, length(charges))
   for (i, R) in enumerate(pos)
     for j = (i+1):length(charges)
       Rij = R - pos[j]
@@ -143,8 +144,9 @@ If λ=1.0 the normal Coulomb is returned
 Analogously defined to LAMMPS `pair_style coul/long/soft`
 """
 function soft_q_μ(Rij::AbstractVector, q1::Real, μ::AbstractArray, λ::Real=0.9, α::Real=10.0)
-  r = norm(Rij)
-  return q1 * sum(Rij .* μ) / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^1.5) *1e10^2 * (1e-21/c_light)
+  #r = norm(Rij)
+  #return q1 * sum(Rij .* μ) / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^1.5) *1e10^2 * (1e-21/c_light)
+  return q1 * dot(Rij, μ) / (4*π*ϵ_0 * (α * (1 - λ)^2 + dot(Rij, Rij))^1.5) *1e10^2 * (1e-21/c_light)
 end
 
 function force_q_μ(Rij::AbstractVector, q1::Real, μ::AbstractArray, λ::Real=0.9, α::Real=10.0)
@@ -157,8 +159,9 @@ If λ=1.0 the normal Coulomb is returned
 Analogously defined to LAMMPS `pair_style coul/long/soft`
 """
 function soft_μ_μ(Rij::AbstractVector, μ1::AbstractArray, μ2::AbstractArray, λ::Real=0.9, α::Real=10.0)
-  r = norm(Rij)
-  return 1 / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^1.5) * (sum(μ1 .* μ2) - 3 * (sum(μ1 .* Rij)) * (sum(Rij .* μ2)) / (α * (1 - λ)^2 + r^2)) *1e10^3 * (1e-21/c_light)^2 / e
+  #r = norm(Rij)
+  #return 1 / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^1.5) * (sum(μ1 .* μ2) - 3 * (sum(μ1 .* Rij)) * (sum(Rij .* μ2)) / (α * (1 - λ)^2 + r^2)) *1e10^3 * (1e-21/c_light)^2 / e
+  return 1 / (4*π*ϵ_0 * (α * (1 - λ)^2 + dot(Rij, Rij))^1.5) * (dot(μ1, μ2) - 3 * dot(μ1, Rij) * dot(Rij, μ2) / (α * (1 - λ)^2 + dot(Rij, Rij))) *1e10^3 * (1e-21/c_light)^2 / e
 end
 
 function force_μ_μ(Rij::AbstractVector, μ1::AbstractArray, μ2::AbstractArray, λ::Real=0.9, α::Real=10.0)

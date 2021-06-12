@@ -6,8 +6,9 @@
 
 using ACE, JuLIP, ACEatoms, ACEbase, Test, LinearAlgebra
 using ACE: evaluate, evaluate_d, SymmetricBasis, NaiveTotalDegree, PIBasis
-using ACEbase.Testing: fdtest
-
+#using ACEbase.Testing: fdtest
+using JuLIP.Testing
+using ACEatoms.Electrostatics: FixedChargeDipole, ESPot
 
 ##
 
@@ -63,5 +64,24 @@ ACEatoms.dipole(V, at)
 B = ACEatoms.basis(V)
 b = ACEatoms.dipole(B, at)
 println(@test( sum( b .* cc ) ≈ ACEatoms.dipole(V, at) ))
+
+##
+
+@info("Finite difference test of ESPot")
+zs = atomic_numbers(at)
+Q = zeros(length(zs))
+for (i,z) in enumerate(zs)
+  if z == AtomicNumber(13)
+    Q[i] = +1
+  else
+    Q[i] = -1
+  end
+end
+set_data!(at, :Q, Q)
+Vref = FixedChargeDipole()
+Vtot = ESPot(JuLIP.MLIPs.SumIP(Vref, V))
+println(@test fdtest(Vtot, at, verbose=true))
+
+##
 
 end
