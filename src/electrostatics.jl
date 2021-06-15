@@ -44,22 +44,37 @@ end
 function forces(V::ESPot, at::Atoms) 
   λ = 0.0  # a sensible looking default for the soft core parameter
   pos = positions(at)
+  # CO: I don't like `V.dipoleevaluator.components[2]` at all, it feels very 
+  #     fragile. -> to discuss!!        
   nlist = neighbourlist(at, cutoff(V.dipoleevaluator.components[2]))
   # TODO getting the atomic dipole at both the enenergy and force calls is wasteful if oe calls them together
+  #      CO: I don't bother with that in the Julia code. The evaluation is usually
+  #          a fraction (~20-30%) of the gradients. Yes, we can optimise this 
+  #          but only worth for production...
   mus = ACEatoms.atomic_dipole(V.dipoleevaluator.components[2], at)
-  Qs = zeros(length(at))
+  
+  # get the static charges on each atom 
   if has_data(at, :Q)
     Qs = get_data(at, :Q)::Vector{Float64} 
-  end  
+  else 
+    Qs = zeros(length(at))  
+  end
+
+  # allocate vectors for storing forces, evaluating the potentials, etc
   Fs = zeros(JVec{Float64}, length(at))
   fs = zeros(JVec{Float64}, length(at))
+  maxN = JuLIP.maxneigs(nlist)
+  tmpd = ACE.alloc_temp_d(V.dipoleevaluator.components[2], maxN)
+  dVc = zeros(SMatrix{3,3,ComplexF64}, maxN)
+  dV = zeros(SMatrix{3,3,Float64}, maxN)
+
   for i = 1:length(at)
     Js, Rs, Zs = JuLIP.Potentials.neigsz(nlist, at, i)
     z0 = at.Z[i]
     tmpd = ACE.alloc_temp_d(V.dipoleevaluator.components[2], length(Rs))
     dV = zeros(SMatrix{3,3,ComplexF64}, length(Rs))
     ACE.evaluate_d!(dV, tmpd, V.dipoleevaluator.components[2], Rs, Zs, z0)
-    dV = real.(dV)
+    map!(dv -> real.(dv), dV, dVc)
     for j = (i+1):length(at) 
       Rij = pos[i] - pos[j]
       fqμ1 = force_q_μ(Rij, Qs[i], mus[j], λ)

@@ -79,23 +79,20 @@ ACE.evaluate_d!(dV, tmpd, V, Rs, Zs, z0)
 ##
 
 @info("Finite difference test of ESPot")
-zs = atomic_numbers(at)
-Q = zeros(length(zs))
-for (i,z) in enumerate(zs)
-  if z == AtomicNumber(13)
-    Q[i] = +1
-  else
-    Q[i] = -1
-  end
-end
+# here is a nice way to avoid the loop :)
+# In Julia it is often good to use functional programming paradigms
+Q = Float64[ (z == 13 ? +1 : -1)  for z in atomic_numbers(at) ]
+# or with map 
+#  Q = map(z -> Float64(z == 13 ? +1 : -1),  atomic_numbers(at))
 set_data!(at, :Q, Q)
 Vref = FixedChargeDipole()
 Vtot = ESPot(JuLIP.MLIPs.SumIP(Vref, V))
 
-# MU_d = ACEatoms.atomic_dipole_d(V, at)
-# println(MU_d)
+energy(Vtot, at)
+forces(Vtot, at)
 
-println(@test fdtest(Vtot, at, verbose=true))
+fdtest(Vtot, at, verbose=true)
+# println(@test fdtest(Vtot, at, verbose=true))
 
 ##
 
