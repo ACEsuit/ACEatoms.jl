@@ -67,6 +67,17 @@ println(@test( sum( b .* cc ) ≈ ACEatoms.dipole(V, at) ))
 
 ##
 
+# unclear right now how to properly generalize the 
+# default `evaluate_d` code, so can we please use the 
+# manual-allocating version.
+
+tmpd = ACE.alloc_temp_d(V, length(Rs))
+dV = zeros(SMatrix{3,3,ComplexF64}, length(Rs))
+ACE.evaluate_d!(dV, tmpd, V, Rs, Zs, z0)
+
+
+##
+
 @info("Finite difference test of ESPot")
 zs = atomic_numbers(at)
 Q = zeros(length(zs))
