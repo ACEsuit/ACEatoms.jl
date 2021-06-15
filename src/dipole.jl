@@ -2,7 +2,6 @@
 using JuLIP: neighbourlist, cutoff
 using ACEatoms.Electrostatics: FixedChargeDipole, c_light, e
 using JuLIP
-using ACE: evaluate_d
 
 _myreal(mu::ACE.EuclideanVector) = real.(mu.val)
 
@@ -76,16 +75,6 @@ function atomic_dipole(V::ACESitePotential, at::Atoms)
    for i = 1:length(at)
       mu[i] = _myreal(evaluate(V.models[at.Z[i]], 
                         environment(V, at, nlist, i)[1]))
-   end
-   return mu
-end
-
-function atomic_dipole_d(V::ACESitePotential, at::Atoms)
-   mu_d = zeros(SMatrix{3,3, Float64}, length(at) )
-   nlist = neighbourlist(at, cutoff(V))
-   for i = 1:length(at)
-      mu[i] = ACE.grad_config(V.models[at.Z[i]], 
-                        environment(V, at, nlist, i)[1])
    end
    return mu
 end

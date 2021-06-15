@@ -4,7 +4,7 @@
 
 ##
 
-using ACE, JuLIP, ACEatoms, ACEbase, Test, LinearAlgebra
+using ACE, JuLIP, ACEatoms, ACEbase, Test, LinearAlgebra, StaticArrays
 using ACE: evaluate, evaluate_d, SymmetricBasis, NaiveTotalDegree, PIBasis
 #using ACEbase.Testing: fdtest
 using JuLIP.Testing
@@ -23,7 +23,7 @@ B1p = ACEatoms.ZμRnYlm_1pbasis(; species = species, maxdeg=maxdeg, D = D,
 ACE.init1pspec!(B1p, maxdeg = maxdeg, Deg = ACE.NaiveTotalDegree())
 φ = ACE.EuclideanVector{ComplexF64}()
 pibasis = PIBasis(B1p, ord, maxdeg; property = φ, isreal = false)
-basis = SymmetricBasis(pibasis, φ)
+basis = SymmetricBasis(pibasis, φ, isreal=true)
 cTi = randn(length(basis))
 cAl = randn(length(basis))
 models = Dict(:Ti => ACE.LinearACEModel(basis, cTi; evaluator = :standard), 
@@ -92,8 +92,8 @@ set_data!(at, :Q, Q)
 Vref = FixedChargeDipole()
 Vtot = ESPot(JuLIP.MLIPs.SumIP(Vref, V))
 
-MU_d = ACEatoms.atomic_dipole_d(V, at)
-println(MU_d)
+# MU_d = ACEatoms.atomic_dipole_d(V, at)
+# println(MU_d)
 
 println(@test fdtest(Vtot, at, verbose=true))
 
