@@ -59,25 +59,28 @@ function forces(V::ESPot, at::Atoms)
     tmpd = ACE.alloc_temp_d(V.dipoleevaluator.components[2], length(Rs))
     dV = zeros(SMatrix{3,3,ComplexF64}, length(Rs))
     ACE.evaluate_d!(dV, tmpd, V.dipoleevaluator.components[2], Rs, Zs, z0)
+    dV = real.(dV)
     for j = (i+1):length(at) 
       Rij = pos[i] - pos[j]
-      fqμ = force_q_μ(Rij, Qs[i], mus[j], λ)[1]
-      fs[i] -= fqμ
-      fs[j] += fqμ
-      fμμ = force_μ_μ(Rij, mus[i], mus[j], λ)[1]
-      fs[i] -= fμμ
-      fs[j] += fμμ  
-    end
-    for j in Js
-      Fs[j] += transpose(dV[j]) * fs[i]
-    end
-  end
-  for (i, R) in enumerate(pos)
-    for j = (i+1):length(Qs)
-      Rij = R - pos[j]
+      fqμ1 = force_q_μ(Rij, Qs[i], mus[j], λ)
+      Fs[i] -= fqμ1[1]
+      Fs[j] += fqμ1[1]
+      fs[j] += fqμ1[2]
+      fqμ2 = force_q_μ(Rij, Qs[j], mus[i], λ)
+      Fs[i] -= fqμ2[1]
+      Fs[j] += fqμ2[1]
+      fs[i] += fqμ2[2]
+      fμμ = force_μ_μ(Rij, mus[i], mus[j], λ)
+      Fs[i] -= fμμ[1]
+      Fs[j] += fμμ[1]  
+      fs[i] += fμμ[2]
+      fs[j] += fμμ[3]
       fqq = force_q_q(Rij,Qs[i], Qs[j], λ)[1]
       Fs[i] -= fqq
       Fs[j] += fqq
+    end
+    for (ji, j) in enumerate(Js)
+      Fs[j] -= transpose(dV[ji]) * fs[i]
     end
   end
   return Fs
