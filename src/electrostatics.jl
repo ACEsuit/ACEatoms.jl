@@ -61,23 +61,17 @@ function forces(V::ESPot, at::Atoms)
   end
 
   # allocate vectors for storing forces, evaluating the potentials, etc
-  Fs = zeros(JVec{Float64}, length(at))
-  fs = zeros(JVec{Float64}, length(at))
+  Fs = zeros(JVec{Float64}, length(at))   # forces 
+  fs = zeros(JVec{Float64}, length(at))   # fs[i] <- ∂E / ∂μ[i]
   maxN = JuLIP.maxneigs(nlist)
   tmpd = ACE.alloc_temp_d(V.dipoleevaluator.components[2], maxN)
   dVc = zeros(SMatrix{3,3,ComplexF64}, maxN)
   dV = zeros(SMatrix{3,3,Float64}, maxN)
 
   for i = 1:length(at)
-    Js, Rs, Zs = JuLIP.Potentials.neigsz(nlist, at, i)
-    z0 = at.Z[i]
-    tmpd = ACE.alloc_temp_d(V.dipoleevaluator.components[2], length(Rs))
-    dV = zeros(SMatrix{3,3,ComplexF64}, length(Rs))
-    ACE.evaluate_d!(dV, tmpd, V.dipoleevaluator.components[2], Rs, Zs, z0)
-    map!(dv -> real.(dv), dV, dVc)
     for j = (i+1):length(at) 
       Rij = pos[i] - pos[j]
-      fqμ1 = force_q_μ(Rij, Qs[i], mus[j], λ)
+      fqμ1 = force_q_μ(Rij, Qs[i], mus[j], λ)  # -> (DRij, Dmu)
       Fs[i] -= fqμ1[1]
       Fs[j] += fqμ1[1]
       fs[j] += fqμ1[2]
@@ -90,14 +84,24 @@ function forces(V::ESPot, at::Atoms)
       Fs[j] += fμμ[1]  
       fs[i] += fμμ[2]
       fs[j] += fμμ[3]
-      fqq = force_q_q(Rij,Qs[i], Qs[j], λ)[1]
+      fqq = force_q_q(Rij, Qs[i], Qs[j], λ)[1]
       Fs[i] -= fqq
       Fs[j] += fqq
-    end
-    for (ji, j) in enumerate(Js)
-      Fs[j] -= transpose(dV[ji]) * fs[i]
-    end
+    end 
   end
+  
+  for i = 1:length(at)
+    Js, Rs, Zs = JuLIP.Potentials.neigsz(nlist, at, i)
+    z0 = at.Z[i]
+    ACE.evaluate_d!(dVc, tmpd, V.dipoleevaluator.components[2], Rs, Zs, z0)
+    map!(dv -> real.(dv), dV, dVc)
+
+    for (j, dVij) in zip(Js, dV)
+      Fs[j] -= transpose(dVij) * fs[i]
+      Fs[i] += transpose(dVij) * fs[i]
+    end
+  end 
+
   return Fs
 end
 
@@ -136,11 +140,12 @@ function electrostatic_energy(pos::AbstractArray, charges::AbstractVector, dipol
   qμ = 0.0
   μμ = 0.0
   for (i, R) in enumerate(pos)
-    for j = (i+1):length(charges)
+    for j = (i+1):length(pos)
       Rij = R - pos[j]
       qq += soft_coulomb(Rij, charges[i], charges[j], λ)
       qμ += soft_q_μ(Rij, charges[i], dipoles[j], λ)
-      # μμ += soft_μ_μ(Rij, dipoles[i], dipoles[j], λ)
+      qμ += soft_q_μ(Rij, charges[j], dipoles[i], λ)
+      μμ += soft_μ_μ(Rij, dipoles[i], dipoles[j], λ)
     end
   end
   return qq + qμ + μμ
@@ -155,7 +160,7 @@ function electrostatic_forces(pos::AbstractArray, charges::AbstractVector, dipol
   @assert pbc == false "Periodic boundary condition not yet supported"
   Fs = zeros(JVec{Float64}, length(charges))
   for (i, R) in enumerate(pos)
-    for j = (i+1):length(charges)
+    for j = (i+1):length(pos)
       Rij = R - pos[j]
       fqq = force_q_q(Rij,charges[i], charges[j], λ)[1]
       Fs[i] -= fqq
