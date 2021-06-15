@@ -81,14 +81,15 @@ function forces(V::ESPot, at::Atoms)
       fqμ = force_q_μ(Rij, Qs[i], mus[j], λ)[1]
       fs[i] -= fqμ
       fs[j] += fqμ
-      fμμ = force_μ_μ(Rij, mus[i], mus[j], λ)[1]
-      fs[i] -= fμμ
-      fs[j] += fμμ  
+      # fμμ = force_μ_μ(Rij, mus[i], mus[j], λ)[1]
+      # fs[i] -= fμμ
+      # fs[j] += fμμ  
     end
     for (j, dv) in zip(Js, dV)
       Fs[j] += transpose(dv) * fs[i]
     end
   end
+
   for (i, R) in enumerate(pos)
     for j = (i+1):length(Qs)
       Rij = R - pos[j]
@@ -131,15 +132,15 @@ calculated using the soft core potentials.
 """
 function electrostatic_energy(pos::AbstractArray, charges::AbstractVector, dipoles::AbstractArray, λ::Real, pbc::Bool=false)
   @assert pbc == false "Periodic boundary condition not yet supported"
-  qq = 0
-  qμ = 0
-  μμ = 0
+  qq = 0.0
+  qμ = 0.0
+  μμ = 0.0
   for (i, R) in enumerate(pos)
     for j = (i+1):length(charges)
       Rij = R - pos[j]
       qq += soft_coulomb(Rij, charges[i], charges[j], λ)
       qμ += soft_q_μ(Rij, charges[i], dipoles[j], λ)
-      μμ += soft_μ_μ(Rij, dipoles[i], dipoles[j], λ)
+      # μμ += soft_μ_μ(Rij, dipoles[i], dipoles[j], λ)
     end
   end
   return qq + qμ + μμ
