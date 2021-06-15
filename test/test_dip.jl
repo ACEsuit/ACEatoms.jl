@@ -80,6 +80,10 @@ end
 set_data!(at, :Q, Q)
 Vref = FixedChargeDipole()
 Vtot = ESPot(JuLIP.MLIPs.SumIP(Vref, V))
+
+MU_d = ACEatoms.atomic_dipole_d(V, at)
+println(MU_d)
+
 println(@test fdtest(Vtot, at, verbose=true))
 
 ##

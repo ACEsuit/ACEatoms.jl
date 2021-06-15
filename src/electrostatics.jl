@@ -150,7 +150,7 @@ function soft_q_μ(Rij::AbstractVector, q1::Real, μ::AbstractArray, λ::Real=0.
 end
 
 function force_q_μ(Rij::AbstractVector, q1::Real, μ::AbstractArray, λ::Real=0.9, α::Real=10.0)
-  return Zygote.gradient(r -> soft_q_μ(r, q1, μ, λ, α), Rij)
+  return Zygote.gradient((r, mu) -> soft_q_μ(r, q1, mu, λ, α), Rij, μ)
 end
 
 """
@@ -165,7 +165,7 @@ function soft_μ_μ(Rij::AbstractVector, μ1::AbstractArray, μ2::AbstractArray,
 end
 
 function force_μ_μ(Rij::AbstractVector, μ1::AbstractArray, μ2::AbstractArray, λ::Real=0.9, α::Real=10.0)
-  return Zygote.gradient(r -> soft_μ_μ(r, μ1, μ2, λ, α), Rij)
+  return Zygote.gradient((r, mu1, mu2) -> soft_μ_μ(r, mu1, mu2, λ, α), Rij, μ1, μ2)
 end
 
 end # end of module Electrostatics
