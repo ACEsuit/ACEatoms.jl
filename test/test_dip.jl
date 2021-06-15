@@ -1,6 +1,6 @@
 
 
-@testset "Experimental Dipoles" begin 
+# @testset "Experimental Dipoles" begin 
 
 ##
 
@@ -88,12 +88,16 @@ set_data!(at, :Q, Q)
 Vref = FixedChargeDipole()
 Vtot = ESPot(JuLIP.MLIPs.SumIP(Vref, V))
 
+##
+
 energy(Vtot, at)
 forces(Vtot, at)
+
+##
 
 fdtest(Vtot, at, verbose=true)
 # println(@test fdtest(Vtot, at, verbose=true))
 
 ##
 
-end
+# end
