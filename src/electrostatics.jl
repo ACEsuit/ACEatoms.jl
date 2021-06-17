@@ -47,7 +47,7 @@ function forces(V::ESPot, at::Atoms)
   # CO: I don't like `V.dipoleevaluator.components[2]` at all, it feels very 
   #     fragile. -> to discuss!!        
   nlist = neighbourlist(at, cutoff(V.dipoleevaluator.components[2]))
-  # TODO getting the atomic dipole at both the enenergy and force calls is wasteful if oe calls them together
+  # TODO getting the atomic dipole at both the enenergy and force calls is wasteful if one calls them together
   #      CO: I don't bother with that in the Julia code. The evaluation is usually
   #          a fraction (~20-30%) of the gradients. Yes, we can optimise this 
   #          but only worth for production...
@@ -75,9 +75,9 @@ function forces(V::ESPot, at::Atoms)
       Fs[i] -= fqμ1[1]
       Fs[j] += fqμ1[1]
       fs[j] += fqμ1[2]
-      fqμ2 = force_q_μ(Rij, Qs[j], mus[i], λ)
-      Fs[i] -= fqμ2[1]
-      Fs[j] += fqμ2[1]
+      fqμ2 = force_q_μ(-1.0 .* Rij, Qs[j], mus[i], λ)
+      Fs[i] += fqμ2[1]
+      Fs[j] -= fqμ2[1]
       fs[i] += fqμ2[2]
       fμμ = force_μ_μ(Rij, mus[i], mus[j], λ)
       Fs[i] -= fμμ[1]
@@ -134,7 +134,7 @@ Total electrostatic enenrgy of a set of point charges and point dipoles
 calculated using the soft core potentials. 
 λ = 1.0 returns the non-soft core version.
 """
-function electrostatic_energy(pos::AbstractArray, charges::AbstractVector, dipoles::AbstractArray, λ::Real, pbc::Bool=false)
+function electrostatic_energy(pos::AbstractArray, charges::AbstractArray, dipoles::AbstractArray, λ::Real, pbc::Bool=false)
   @assert pbc == false "Periodic boundary condition not yet supported"
   qq = 0.0
   qμ = 0.0
@@ -144,7 +144,7 @@ function electrostatic_energy(pos::AbstractArray, charges::AbstractVector, dipol
       Rij = R - pos[j]
       qq += soft_coulomb(Rij, charges[i], charges[j], λ)
       qμ += soft_q_μ(Rij, charges[i], dipoles[j], λ)
-      qμ += soft_q_μ(Rij, charges[j], dipoles[i], λ)
+      qμ += soft_q_μ(-1.0 .* Rij, charges[j], dipoles[i], λ)
       μμ += soft_μ_μ(Rij, dipoles[i], dipoles[j], λ)
     end
   end
@@ -152,25 +152,28 @@ function electrostatic_energy(pos::AbstractArray, charges::AbstractVector, dipol
 end
 
 """
-Electrostatic forces of a set of fixed point charges and fixed point dipoles
+Electrostatic forces of a set of FIXED point charges and FIXED point dipoles
 calculated using the soft core potentials. 
 λ = 1.0 returns the non-soft core version.
 """
-function electrostatic_forces(pos::AbstractArray, charges::AbstractVector, dipoles::AbstractArray, λ::Real, pbc::Bool=false)
+function electrostatic_forces(pos::AbstractArray, charges::AbstractArray, dipoles::AbstractArray, λ::Real, pbc::Bool=false)
   @assert pbc == false "Periodic boundary condition not yet supported"
   Fs = zeros(JVec{Float64}, length(charges))
   for (i, R) in enumerate(pos)
     for j = (i+1):length(pos)
       Rij = R - pos[j]
       fqq = force_q_q(Rij,charges[i], charges[j], λ)[1]
-      Fs[i] -= fqq
-      Fs[j] += fqq
+      Fs[i] -= JVec(fqq)
+      Fs[j] += JVec(fqq)
       fqμ = force_q_μ(Rij, charges[i], dipoles[j], λ)[1]
-      Fs[i] -= fqμ
-      Fs[j] += fqμ
+      Fs[i] -= JVec(fqμ)
+      Fs[j] += JVec(fqμ)
+      fqμ = force_q_μ(-1.0 .* Rij, charges[j], dipoles[i], λ)[1]
+      Fs[i] += JVec(fqμ)
+      Fs[j] -= JVec(fqμ)
       fμμ = force_μ_μ(Rij, dipoles[i], dipoles[j], λ)[1]
-      Fs[i] -= fμμ
-      Fs[j] += fμμ      
+      Fs[i] -= JVec(fμμ)
+      Fs[j] += JVec(fμμ)    
     end
   end
   return Fs
@@ -183,12 +186,11 @@ Adapted from LAMMPS `pair_style coul/long/soft`
 """
 
 # TODO one single r_ij argument for forces
-function soft_coulomb(Rij::AbstractVector, q1::Real, q2::Real, λ::Real=0.0, α::Real=10.0)
-  r = norm(Rij)
-  return q1 * q2 / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^0.5) * e * 1e10
+function soft_coulomb(Rij::AbstractArray, q1::Real, q2::Real, λ::Real=0.0, α::Real=10.0)
+  return q1 * q2 / (4*π*ϵ_0 * (α * (1 - λ)^2 + dot(Rij, Rij))^0.5) * e * 1e10
 end
 
-function force_q_q(Rij::AbstractVector, q1::Real, q2::Real, λ::Real=0.0, α::Real=10.0)
+function force_q_q(Rij::AbstractArray, q1::Real, q2::Real, λ::Real=0.0, α::Real=10.0)
   return Zygote.gradient(r -> soft_coulomb(r, q1, q2, λ, α), Rij)
 end
 
@@ -196,30 +198,28 @@ end
 Soft core Coulomb interaction between point charge and point dipole
 If λ=1.0 the normal Coulomb is returned
 Analogously defined to LAMMPS `pair_style coul/long/soft`
+Rji = Ri - Rj vector
 """
-function soft_q_μ(Rij::AbstractVector, q1::Real, μ::AbstractArray, λ::Real=0.0, α::Real=10.0)
-  #r = norm(Rij)
-  #return q1 * sum(Rij .* μ) / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^1.5) *1e10^2 * (1e-21/c_light)
-  return q1 * dot(Rij, μ) / (4*π*ϵ_0 * (α * (1 - λ)^2 + dot(Rij, Rij))^1.5) *1e10^2 * (1e-21/c_light)
+function soft_q_μ(Rji::AbstractArray, q1::Real, μ::AbstractArray, λ::Real=0.0, α::Real=10.0)
+  return q1 * dot(μ, Rji) / (4*π*ϵ_0 * (α * (1 - λ)^2 + dot(Rji, Rji))^1.5) *1e10^2 * (1e-21/c_light)
 end
 
-function force_q_μ(Rij::AbstractVector, q1::Real, μ::AbstractArray, λ::Real=0.0, α::Real=10.0)
-  return Zygote.gradient((r, mu) -> soft_q_μ(r, q1, mu, λ, α), Rij, μ)
+function force_q_μ(Rji::AbstractArray, q1::Real, μ::AbstractArray, λ::Real=0.0, α::Real=10.0)
+  return Zygote.gradient((r, mu) -> soft_q_μ(r, q1, mu, λ, α), Rji, μ)
 end
 
 """
 Soft core Coulomb interaction between two point dipoles
 If λ=1.0 the normal Coulomb is returned
 Analogously defined to LAMMPS `pair_style coul/long/soft`
+Rji = Ri - Rj vector
 """
-function soft_μ_μ(Rij::AbstractVector, μ1::AbstractArray, μ2::AbstractArray, λ::Real=0.0, α::Real=10.0)
-  #r = norm(Rij)
-  #return 1 / (4*π*ϵ_0 * (α * (1 - λ)^2 + r^2)^1.5) * (sum(μ1 .* μ2) - 3 * (sum(μ1 .* Rij)) * (sum(Rij .* μ2)) / (α * (1 - λ)^2 + r^2)) *1e10^3 * (1e-21/c_light)^2 / e
-  return 1 / (4*π*ϵ_0 * (α * (1 - λ)^2 + dot(Rij, Rij))^1.5) * (dot(μ1, μ2) - 3 * dot(μ1, Rij) * dot(Rij, μ2) / (α * (1 - λ)^2 + dot(Rij, Rij))) *1e10^3 * (1e-21/c_light)^2 / e
+function soft_μ_μ(Rji::AbstractArray, μ1::AbstractArray, μ2::AbstractArray, λ::Real=0.0, α::Real=10.0)
+  return 1.0 / (4*π*ϵ_0 * (α * (1.0 - λ)^2 + dot(Rji, Rji))^1.5) * (dot(μ1, μ2) - 3 * dot(μ1, Rji) * dot(μ2, Rji) / (α * (1 - λ)^2 + dot(Rji, Rji))) *1e10^3 * (1e-21/c_light)^2 / e
 end
 
-function force_μ_μ(Rij::AbstractVector, μ1::AbstractArray, μ2::AbstractArray, λ::Real=0.0, α::Real=10.0)
-  return Zygote.gradient((r, mu1, mu2) -> soft_μ_μ(r, mu1, mu2, λ, α), Rij, μ1, μ2)
+function force_μ_μ(Rji::AbstractArray, μ1::AbstractArray, μ2::AbstractArray, λ::Real=0.0, α::Real=10.0)
+  return Zygote.gradient((r, mu1, mu2) -> soft_μ_μ(r, mu1, mu2, λ, α), Rji, μ1, μ2)
 end
 
 end # end of module Electrostatics

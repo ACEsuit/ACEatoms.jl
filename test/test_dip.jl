@@ -100,4 +100,19 @@ fdtest(Vtot, at, verbose=true)
 
 ##
 
+# results comparing to LAMMPS
+
+pos = [[0 0 0], [0.6 -0.5 2.0]];
+qs = [-3.0 2.0];
+mus = [[1.0 -2.0 0.0], [0.0 1.0 1.0]];
+
+E_lammps = -38.13193136344523
+F_lammps = [4.98417437 -3.94540397 15.64287832];
+
+E = ACEatoms.Electrostatics.electrostatic_energy(pos, qs, mus, 1.0)
+F = ACEatoms.Electrostatics.electrostatic_forces(pos, qs, mus, 1.0)[1]
+
+println(@test isapprox(E_lammps, E, rtol=1e-6))
+println(@test isapprox(F_lammps[1], F[1], rtol=1e-6) && isapprox(F_lammps[2], F[2], rtol=1e-6) && isapprox(F_lammps[3], F[3], rtol=1e-6))
+
 # end
