@@ -11,6 +11,7 @@ using Zygote
 using JuLIP
 using StaticArrays
 using ACEatoms, ACE
+using SpecialFunctions: erf
 import JuLIP: energy, forces
 
 export get_dipole, electrostatic_energy, electrostatic_forces, soft_coulomb, 
@@ -185,7 +186,6 @@ If λ=1.0 the normal Coulomb is returned
 Adapted from LAMMPS `pair_style coul/long/soft`
 """
 
-# TODO one single r_ij argument for forces
 function soft_coulomb(Rij::AbstractArray, q1::Real, q2::Real, λ::Real=0.0, α::Real=10.0)
   return q1 * q2 / (4*π*ϵ_0 * (α * (1 - λ)^2 + dot(Rij, Rij))^0.5) * e * 1e10
 end
@@ -195,13 +195,27 @@ function force_q_q(Rij::AbstractArray, q1::Real, q2::Real, λ::Real=0.0, α::Rea
 end
 
 """
+Coulomb interaction between two Gaussian charge clouds
+"""
+
+function gaus_coulomb(Rij::AbstractArray, q1::Real, q2::Real, σ1::Real, σ2::Real)
+  rij = dot(Rij, Rij)^0.5
+  α = 1 / (2 * (σ1^2 + σ2^2))^0.5
+  return q1 * q2 / (4*π*ϵ_0 * rij) * erf(α*rij) * e * 1e10
+end
+
+function force_q_q_gauss(Rij::AbstractArray, q1::Real, q2::Real, σ1::Real, σ2::Real)
+  return Zygote.gradient(r -> gaus_coulomb(r, q1, q2, σ1, σ2), Rij)
+end
+
+"""
 Soft core Coulomb interaction between point charge and point dipole
 If λ=1.0 the normal Coulomb is returned
 Analogously defined to LAMMPS `pair_style coul/long/soft`
 Rji = Ri - Rj vector
 """
 function soft_q_μ(Rji::AbstractArray, q1::Real, μ::AbstractArray, λ::Real=0.0, α::Real=10.0)
-  return q1 * dot(μ, Rji) / (4*π*ϵ_0 * (α * (1 - λ)^2 + dot(Rji, Rji))^1.5) *1e10^2 * (1e-21/c_light)
+  return q1 * dot(μ, Rji) / (4*π*ϵ_0 * (α * (1 - λ)^2 + dot(Rji, Rji))^1.5) * (1e-1/c_light)
 end
 
 function force_q_μ(Rji::AbstractArray, q1::Real, μ::AbstractArray, λ::Real=0.0, α::Real=10.0)
@@ -215,7 +229,7 @@ Analogously defined to LAMMPS `pair_style coul/long/soft`
 Rji = Ri - Rj vector
 """
 function soft_μ_μ(Rji::AbstractArray, μ1::AbstractArray, μ2::AbstractArray, λ::Real=0.0, α::Real=10.0)
-  return 1.0 / (4*π*ϵ_0 * (α * (1.0 - λ)^2 + dot(Rji, Rji))^1.5) * (dot(μ1, μ2) - 3 * dot(μ1, Rji) * dot(μ2, Rji) / (α * (1 - λ)^2 + dot(Rji, Rji))) *1e10^3 * (1e-21/c_light)^2 / e
+  return 1.0 / (4*π*ϵ_0 * (α * (1.0 - λ)^2 + dot(Rji, Rji))^1.5) * (dot(μ1, μ2) - 3 * dot(μ1, Rji) * dot(μ2, Rji) / (α * (1 - λ)^2 + dot(Rji, Rji))) *1e-12 * (1/c_light)^2 / e
 end
 
 function force_μ_μ(Rji::AbstractArray, μ1::AbstractArray, μ2::AbstractArray, λ::Real=0.0, α::Real=10.0)
