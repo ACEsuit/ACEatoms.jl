@@ -5,12 +5,6 @@ using StaticArrays, Reexport
 
 include("ext_imports.jl")
 
-using ACE: EuclideanVectorState,
-           PolyTransform,
-           transformed_jacobi
-
-export SpeciesState, PositionState
-
 import JuLIP: dipole, energy, forces
 
 include("configs.jl")
@@ -28,6 +22,8 @@ include("utils.jl")
 include("siteenergy.jl")
 
 # include("ad.jl")
+
+include("models/models.jl")
 
 include("dipole.jl")
 
