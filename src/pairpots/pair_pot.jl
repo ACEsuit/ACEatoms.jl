@@ -1,5 +1,6 @@
 
 export PolyPairPot
+import JuLIP.Potentials: alloc_temp, alloc_temp_d 
 
 struct PolyPairPot{T,TJ,NZ} <: PairPotential
    coeffs::Vector{T}
@@ -39,13 +40,13 @@ read_dict(::Val{:ACE_PolyPairPot}, D::Dict, T = read_dict(D["T"])) =
 alloc_temp(V::PolyPairPot{T}, N::Integer) where {T} =
       ( R = zeros(JVec{T}, N),
         Z = zeros(AtomicNumber, N),
-        alloc_temp(V.basis)... )
+        J = acquire_B!(V.basis.J) )
 
 alloc_temp_d(V::PolyPairPot{T}, N::Integer) where {T} =
       ( dV = zeros(JVec{T}, N),
          R = zeros(JVec{T}, N),
          Z = zeros(AtomicNumber, N),
-         alloc_temp_d(V.basis)... )
+         dJ = acquire_dB!(V.basis.J) )
 
 
 function _dot_zij(V, B, z, z0)
@@ -54,10 +55,10 @@ function _dot_zij(V, B, z, z0)
 end
 
 evaluate!(tmp, V::PolyPairPot, r::Number, z, z0) =
-      _dot_zij(V, evaluate!(tmp.J, tmp.tmp_J, V.basis.J, r), z, z0)
+      _dot_zij(V, evaluate!(tmp.J, V.basis.J, r), z, z0)
 
 evaluate_d!(tmp, V::PolyPairPot, r::Number, z, z0) =
-      _dot_zij(V, evaluate_d!(tmp.dJ, tmp.tmpd_J, V.basis.J, r), z, z0)
+      _dot_zij(V, evaluate_d!(tmp.dJ, V.basis.J, r), z, z0)
 
 function evaluate!(tmp, V::PolyPairPot, r::Number)
    @assert numz(V) == 1

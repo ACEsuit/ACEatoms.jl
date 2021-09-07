@@ -7,6 +7,8 @@
 ##
 
 using ACE
+using ACEatoms 
+PairPotentials = ACEatoms.PairPotentials
 using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
 using JuLIP: evaluate, evaluate_d
 using JuLIP.Potentials: i2z, numz

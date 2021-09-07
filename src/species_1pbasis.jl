@@ -34,8 +34,8 @@ Base.length(basis::AbstractSpecies1PBasis) = length(basis.zlist)^2
 
 function ACE.evaluate!(A, basis::Species1PBasis, X::AbstractState)
    fill!(A, false)
-   B[z2i(basis.zlist, X.mu)] = true
-   return B
+   A[z2i(basis.zlist, X.mu)] = true
+   return A
 end
 
 ACE.valtype(::AbstractSpecies1PBasis, X) = Bool
