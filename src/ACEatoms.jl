@@ -9,8 +9,8 @@ include("configs.jl")
 
 include("species_1pbasis.jl")
 
-# include("pairpots/pair.jl")
-# @reexport using ACEatoms.PairPotentials
+include("pairpots/pair.jl")
+@reexport using ACEatoms.PairPotentials
 
 # include("electrostatics.jl")
 
