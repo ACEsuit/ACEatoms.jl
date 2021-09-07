@@ -60,7 +60,7 @@ end
 function basis(V::ACESitePotential{ENV}) where ENV 
    models = Dict( [sym => model.basis for (sym, model) in V.models]... )
    inds = _get_basisinds(V)
-   return ACESitePotentialBasis{ENV, valtype(models)}(models, inds)
+   return ACESitePotentialBasis{ENV, Base.valtype(models)}(models, inds)
 end
 
 function environment(V::ACESiteCalc{<: ACEConfig}, 
@@ -82,6 +82,9 @@ environment(V::ACESiteCalc{<: ACEConfig},
 evaluate!(tmp, V::ACESitePotential, Rs, Zs, z0) = 
       evaluate(V.models[z0], environment(V, Rs, Zs, z0)).val
 
+# JuLIP.alloc_temp(V::ACESitePotentialBasis, N::Integer) = 
+#       (JuLIP.Potentials.alloc_temp_site(N)..., )
+
 function evaluate!(B, tmp, V::ACESitePotentialBasis, Rs, Zs, z0) 
    # fill!(B, 0)
    Bview = (@view B[V.inds[z0]])
@@ -93,7 +96,9 @@ end
 import ACEbase
 function ACEbase.evaluate_d(V::ACESiteCalc, Rs::AbstractVector{JVec{T}}, Zs, z0) where {T} 
    env = environment(V, Rs, Zs, z0)
-   ACE.grad_config!(tmpd.dV, V.models[z0], env)
+   dV = zeros(JVec{T}, length(Rs))
+   ACE.grad_config!(dV, V.models[z0], env)
+   return dV 
 end
 
 function evaluate_d!(dV, _tmpd, V::ACESitePotential, Rs, Zs, z0) 
