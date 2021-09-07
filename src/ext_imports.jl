@@ -21,12 +21,10 @@ import JuLIP.MLIPs: IPBasis
 import JuLIP.Potentials: ZList, SZList, zlist
 
 
-import ACEbase: alloc_temp, alloc_temp_d,
-                evaluate, evaluate_d,
+import ACEbase: evaluate, evaluate_d,
                 evaluate!, evaluate_d!,
                 read_dict, write_dict,
-                fltype, rfltype,
-                alloc_B, alloc_dB,
+                valtype, 
                 combine,
                 ScalarACEBasis, _allfieldsequal
 

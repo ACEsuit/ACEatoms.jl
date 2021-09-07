@@ -5,7 +5,7 @@
 ##
 
 using ACE, JuLIP, ACEatoms, ACEbase, Test, LinearAlgebra
-using ACE: evaluate, evaluate_d, SymmetricBasis, NaiveTotalDegree, PIBasis
+using ACE: evaluate, evaluate_d, SymmetricBasis, SimpleSparseBasis, PIBasis
 using ACEbase.Testing: fdtest
 
 
@@ -13,16 +13,16 @@ using ACEbase.Testing: fdtest
 
 # construct the 1p-basis
 @info("Construcing a Linear ACE Model")
-D = NaiveTotalDegree()
 maxdeg = 8
 ord = 3
+Bsel = SimpleSparseBasis(ord, maxdeg)
+
 species = [:Ti, :Al]
-B1p = ACEatoms.ZμRnYlm_1pbasis(; species = species, maxdeg=maxdeg, D = D, 
+B1p = ACEatoms.ZμRnYlm_1pbasis(; species = species, maxdeg=maxdeg, Bsel = Bsel, 
                                  rin = 1.2, rcut = 5.0)
-ACE.init1pspec!(B1p, maxdeg = maxdeg, Deg = ACE.NaiveTotalDegree())
-φ = ACE.Invariant()
-pibasis = PIBasis(B1p, ord, maxdeg; property = φ)
-basis = SymmetricBasis(pibasis, φ)
+
+ACE.init1pspec!(B1p, Bsel)
+basis = SymmetricBasis(ACE.Invariant(), B1p, Bsel)
 cTi = randn(length(basis))
 cAl = randn(length(basis))
 models = Dict(:Ti => ACE.LinearACEModel(basis, cTi; evaluator = :standard), 
@@ -55,11 +55,12 @@ v2 = evaluate(V, Rs, Zs, z0)
 println(@test v1 ≈ v2)
 energy(V, at)
 
+
 ##
 @info("Test that grad_config(model) ≈ evaluate_d(site-potential)")
 dEs = zeros(JVecF, length(env))
-dv1 = ACE.grad_config!(dEs, ACE.alloc_temp_d(V.models[z0], env), V.models[z0], env)
-dv2 = JuLIP.evaluate_d!(dEs, ACE.alloc_temp_d(V, env), V, Rs, Zs, z0)
+dv1 = ACE.grad_config!(dEs, V.models[z0], env)
+dv2 = JuLIP.evaluate_d!(dEs, nothing, V, Rs, Zs, z0)
 dv3 = evaluate_d(V, Rs, Zs, z0)
 
 println(@test(dv1 ≈ dv2))

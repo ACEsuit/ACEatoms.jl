@@ -1,19 +1,25 @@
 
 
 using ACE.Random: rand_radial, rand_sphere
+using ACE: ACEConfig
 
-function ZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = Inf, Deg = ACE.NaiveTotalDegree(), kwargs...)
-   RnYlm = ACE.Utils.RnYlm_1pbasis(; init=false, D = Deg, kwargs...)
+function ZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = nothing, 
+                           maxL = maxdeg, 
+                           Bsel = ACE.SimpleSparseBasis(1, maxdeg), 
+                           kwargs...)
+   RnYlm = ACE.Utils.RnYlm_1pbasis(; maxdeg=maxdeg, maxL=maxL, Bsel = Bsel, kwargs...)
    Zμ = Species1PBasis(species)
    B1p = Zμ * RnYlm
    if init 
-      ACE.init1pspec!(B1p; maxdeg = maxdeg, Deg = Deg)
+      ACE.init1pspec!(B1p, Bsel)
    end
    return B1p
 end
 
-_rand_atstate(Zμ, Rn) = 
-      AtomState{Float64}(mu = rand(Zμ), rr = rand_radial(Rn) * rand_sphere() )
+_rand_atstate(mu0, Zμ, Rn) = 
+      AtomState{Float64}(mu = rand(Zμ), 
+                         mu0 = mu0, 
+                         rr = rand_radial(Rn) * rand_sphere() )
 
 
 function rand_environment(B1p, Nat::Integer)
@@ -23,9 +29,9 @@ function rand_environment(B1p, Nat::Integer)
    Zμ = B1p.bases[1] 
    @assert Zμ isa Species1PBasis
    
-   Xs = [ _rand_atstate(Zμ, Rn) for _ = 1:Nat ]
-   X0 = AtomState{Float64}( mu = rand(Zμ) )
-   return AtomicEnvironment(X0, Xs)
+   mu0 = rand(Zμ)
+   Xs = [ _rand_atstate(mu0, Zμ, Rn) for _ = 1:Nat ]
+   return ACEConfig(Xs)
 end
 
 

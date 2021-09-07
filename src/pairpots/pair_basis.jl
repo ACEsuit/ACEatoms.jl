@@ -2,6 +2,10 @@
 import ACE
 export PolyPairBasis
 
+import ACEbase: valtype, acquire_B!, acquire_dB!, 
+                  release_B!, release_dB!
+
+
 # TODO: allow PairBasis with different Pr for each z, z' combination
 
 # TODO: is this a hack???
@@ -14,7 +18,7 @@ struct PolyPairBasis{TJ, NZ} <: IPBasis
    bidx0::SMatrix{NZ,NZ,Int}
 end
 
-JuLIP.fltype(pB::PolyPairBasis) = ACE.fltype(pB.J)
+valtype(pB::PolyPairBasis, args...) = valtype(pB.J)
 
 Base.length(pB::PolyPairBasis) = length(pB.J) * (numz(pB) * (numz(pB) + 1)) ÷ 2
 Base.length(pB::PolyPairBasis, z0::AtomicNumber) = length(pB, z2i(pB, z0))
@@ -68,15 +72,15 @@ write_dict(pB::PolyPairBasis) = Dict(
 read_dict(::Val{:ACE_PolyPairBasis}, D::Dict) =
       PolyPairBasis( read_dict(D["Pr"]), read_dict(D["zlist"]) )
 
-alloc_temp(pB::PolyPairBasis, args...) = (
-              J = alloc_B(pB.J),
-          tmp_J = alloc_temp(pB.J)  )
+# alloc_temp(pB::PolyPairBasis, args...) = (
+#               J = alloc_B(pB.J),
+#           tmp_J = alloc_temp(pB.J)  )
 
-alloc_temp_d(pB::PolyPairBasis, args...) =  (
-             J = alloc_B( pB.J),
-         tmp_J = alloc_temp(pB.J),
-            dJ = alloc_dB(pB.J),
-        tmpd_J = alloc_temp_d(pB.J)  )
+# alloc_temp_d(pB::PolyPairBasis, args...) =  (
+#              J = alloc_B( pB.J),
+#          tmp_J = alloc_temp(pB.J),
+#             dJ = alloc_dB(pB.J),
+#         tmpd_J = alloc_temp_d(pB.J)  )
 
 """
 compute the zeroth index of the basis corresponding to the potential between
@@ -87,43 +91,46 @@ _Bidx0(pB, i::Integer, j::Integer) = pB.bidx0[ i, j ]
 
 function energy(pB::PolyPairBasis, at::Atoms{T}) where {T}
    E = zeros(T, length(pB))
-   tmp = alloc_temp(pB)
+   J = acquire_B!(pB.J)
    for (i, j, R) in pairs(at, cutoff(pB))
       r = norm(R)
-      evaluate!(tmp.J, tmp.tmp_J, pB.J, r)
+      evaluate!(J, pB.J, r)
       idx0 = _Bidx0(pB, at.Z[i], at.Z[j])
       for n = 1:length(pB.J)
-         E[idx0 + n] += 0.5 * tmp.J[n]
+         E[idx0 + n] += 0.5 * J[n]
       end
    end
+   release_B!(pB.J, J)
    return E
 end
 
 function forces(pB::PolyPairBasis, at::Atoms{T}) where {T}
    F = zeros(JVec{T}, length(at), length(pB))
-   tmp = alloc_temp_d(pB)
+   dJ = acquire_dB!(pB.J)
    for (i, j, R) in pairs(at, cutoff(pB))
       r = norm(R)
-      evaluate_d!(tmp.dJ, tmp.tmpd_J, pB.J, r)
+      evaluate_d!(dJ, pB.J, r)
       idx0 = _Bidx0(pB, at.Z[i], at.Z[j])
       for n = 1:length(pB.J)
-         F[i, idx0 + n] += 0.5 * tmp.dJ[n] * (R/r)
-         F[j, idx0 + n] -= 0.5 * tmp.dJ[n] * (R/r)
+         F[i, idx0 + n] += 0.5 * dJ[n] * (R/r)
+         F[j, idx0 + n] -= 0.5 * dJ[n] * (R/r)
       end
    end
+   release_dB!(pB.J, dJ)
    return [ F[:, iB] for iB = 1:length(pB) ]
 end
 
 function virial(pB::PolyPairBasis, at::Atoms{T}) where {T}
    V = zeros(JMat{T}, length(pB))
-   tmp = alloc_temp_d(pB)
+   dJ = acquire_dB!(pB.J)
    for (i, j, R) in pairs(at, cutoff(pB))
       r = norm(R)
-      evaluate_d!(tmp.dJ, tmp.tmpd_J, pB.J, r)
+      evaluate_d!(dJ, pB.J, r)
       idx0 = _Bidx0(pB, at.Z[i], at.Z[j])
       for n = 1:length(pB.J)
-         V[idx0 + n] -= 0.5 * (tmp.dJ[n]/r) * R * R'
+         V[idx0 + n] -= 0.5 * (dJ[n]/r) * R * R'
       end
    end
+   release_dB!(pB.J, dJ)
    return V
 end

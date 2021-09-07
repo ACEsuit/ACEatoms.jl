@@ -12,15 +12,14 @@ include("species_1pbasis.jl")
 include("pairpots/pair.jl")
 @reexport using ACEatoms.PairPotentials
 
-include("electrostatics.jl")
+# include("electrostatics.jl")
 
 include("utils.jl")
 
 include("siteenergy.jl")
 
+# DONT UNCOMMENT ANYTHING BELOW HERE FOR NOW!!!
 # include("ad.jl")
-
-include("models/models.jl")
-
+# include("models/models.jl")
 
 end
