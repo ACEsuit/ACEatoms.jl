@@ -38,7 +38,7 @@ function ACE.evaluate!(A, basis::Species1PBasis, X::AbstractState)
    return A
 end
 
-ACE.valtype(::AbstractSpecies1PBasis, X) = Bool
+ACE.valtype(::AbstractSpecies1PBasis, args...) = Bool
 
 symbols(::Species1PBasis) = [:μ]
 

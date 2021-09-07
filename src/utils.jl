@@ -5,8 +5,9 @@ using ACE: ACEConfig
 
 function ZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = nothing, 
                            maxL = maxdeg, 
-                           Bsel = ACE.SimpleSparseBasis(1, maxdeg), kwargs...)
-   RnYlm = ACE.Utils.RnYlm_1pbasis(; maxdeg=maxdeg, maxL=maxL, Bsel = Bsel)
+                           Bsel = ACE.SimpleSparseBasis(1, maxdeg), 
+                           kwargs...)
+   RnYlm = ACE.Utils.RnYlm_1pbasis(; maxdeg=maxdeg, maxL=maxL, Bsel = Bsel, kwargs...)
    Zμ = Species1PBasis(species)
    B1p = Zμ * RnYlm
    if init 

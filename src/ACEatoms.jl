@@ -16,7 +16,7 @@ include("pairpots/pair.jl")
 
 include("utils.jl")
 
-# include("siteenergy.jl")
+include("siteenergy.jl")
 
 # # include("ad.jl")
 
