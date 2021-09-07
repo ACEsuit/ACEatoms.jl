@@ -80,7 +80,6 @@ environment(V::ACESiteCalc{<: AtomicEnvironment},
 
 JuLIP.alloc_temp(V::ACESiteCalc, N::Integer) = 
       ( JuLIP.Potentials.alloc_temp_site(N)..., 
-        tmpmodel = Dict([z => alloc_temp(mo) for (z, mo) in V.models]...)
       )
 
 evaluate!(tmp, V::ACESitePotential, Rs, Zs, z0) = 
@@ -93,11 +92,11 @@ function evaluate!(B, tmp, V::ACESitePotentialBasis, Rs, Zs, z0)
    return B 
 end
 
-alloc_temp_d(V::ACESiteCalc, env::AbstractConfiguration) = 
-      ( JuLIP.Potentials.alloc_temp_site(length(env))...,
-        dV = zeros(JVec{Float64}, length(env)), 
-        tmpdmodel = Dict([ z => alloc_temp_d(mo, env) for (z, mo) in V.models ]...)
-      )
+# alloc_temp_d(V::ACESiteCalc, env::AbstractConfiguration) = 
+#       ( JuLIP.Potentials.alloc_temp_site(length(env))...,
+#         dV = zeros(JVec{Float64}, length(env)), 
+#         tmpdmodel = Dict([ z => alloc_temp_d(mo, env) for (z, mo) in V.models ]...)
+#       )
 
 import ACEbase
 function ACEbase.evaluate_d(V::ACESiteCalc, Rs::AbstractVector{JVec{T}}, Zs, z0) where {T} 
