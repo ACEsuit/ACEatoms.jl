@@ -1,7 +1,7 @@
 name = "ACEatoms"
 uuid = "1e34e032-0b37-4839-a012-196b35408c3c"
 authors = ["Christoph Ortner <christophortner0@gmail.com> and contributors"]
-version = "0.0.6"
+version = "0.0.7"
 
 [deps]
 ACE = "3e8ccfd2-c8b0-11ea-32f1-f3a5990fd77a"
@@ -17,7 +17,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 ACE = "0.12.7"
 JuLIP = "0.13"
 StaticArrays = "1.0"
-julia = "1.5, 1.6"
+julia = "1.6"
 
 [extras]
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
