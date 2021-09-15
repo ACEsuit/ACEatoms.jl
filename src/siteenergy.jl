@@ -46,6 +46,28 @@ end
 ACESitePotential(models::Dict{AtomicNumber, TM}, ENV = ACEConfig) where {TM} = 
      ACESitePotential{ENV, TM}(models)
 
+
+
+# ----------------------------- FIO 
+import ACEbase: write_dict, read_dict
+import Base: == 
+
+write_dict(V::ACESitePotential) = 
+      Dict( "__id__" => "ACEatoms_ACESitePotential", 
+            "models" => Dict([ string(Int(z)) => write_dict(m)  for (z, m) in V.models ]...))
+
+function read_dict(::Val{:ACEatoms_ACESitePotential}, D::Dict) 
+   models = Dict([ AtomicNumber(parse(Int, z)) => read_dict(m) 
+                   for (z, m) in D["models"] ]...)
+   return ACESitePotential(models)
+end
+
+==(V1::ACESitePotential, V2::ACESitePotential) = 
+      (V1.models == V2.models)
+
+# ----------------------------- 
+
+
 function _get_basisinds(V::ACESitePotential)
    inds = Dict{AtomicNumber, UnitRange{Int}}()
    i0 = 0
@@ -90,15 +112,6 @@ function evaluate!(B, tmp, V::ACESitePotentialBasis, Rs, Zs, z0)
    Bview = (@view B[V.inds[z0]])
    evaluate!(Bview, V.models[z0], environment(V, Rs, Zs, z0))
    return B 
-end
-
-write_dict(V::ACESitePotential) = 
-      Dict( "__id__" => "ACESitePotential", 
-            "models" => Dict([ Int(z) => write_dict(m)  for (z, m) in V.models ]...))
-
-function read_dict(::Val{:ACESitePotential}, D::Dict) 
-   models = Dict([ AtomicNumber(Symbol(z)) => read_dict(m) for (z, m) in D["models"] ]...)
-   return ACESitePotential(models)
 end
 
 import ACEbase

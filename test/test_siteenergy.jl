@@ -31,6 +31,12 @@ models = Dict(:Ti => ACE.LinearACEModel(basis, cTi; evaluator = :standard),
 @info("Convert LinearACEModel into an ACESitePotential")
 V = ACEatoms.ACESitePotential(models)
 
+## FIO 
+
+@info("Check FIO")
+using ACEbase.Testing: test_fio 
+println(@test(all(test_fio(V; warntype = false))))
+
 ##
 
 @info("Create random TiAl configuration")
@@ -71,12 +77,6 @@ forces(V, at)
 
 @info("Finite-difference test on total energy")
 println(@test JuLIP.Testing.fdtest(V, at))
-
-## FIO 
-
-@info("Check FIO")
-using ACEbase.Testing: test_fio 
-println(@test(all(test_fio(V; warntype = false))))
 
 ##
 
