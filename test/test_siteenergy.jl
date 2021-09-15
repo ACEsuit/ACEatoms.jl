@@ -72,6 +72,12 @@ forces(V, at)
 @info("Finite-difference test on total energy")
 println(@test JuLIP.Testing.fdtest(V, at))
 
+## FIO 
+
+@info("Check FIO")
+using ACEbase.Testing: test_fio 
+println(@test(all(test_fio(V; warntype = false))))
+
 ##
 
 @info("Check also the ACESitePotentialBasis interface")
@@ -97,7 +103,5 @@ val1 = virial(V, at)
 virB = virial(ipbasis, at)
 val2 = sum(cc .* virB)
 println(@test val1 ≈ val2)
-
-##
 
 end

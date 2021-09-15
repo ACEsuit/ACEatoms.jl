@@ -92,6 +92,14 @@ function evaluate!(B, tmp, V::ACESitePotentialBasis, Rs, Zs, z0)
    return B 
 end
 
+write_dict(V::ACESitePotential) = 
+      Dict( "__id__" => "ACESitePotential", 
+            "models" => Dict([ Int(z) => write_dict(m)  for (z, m) in V.models ]...))
+
+function read_dict(::Val{:ACESitePotential}, D::Dict) 
+   models = Dict([ AtomicNumber(Symbol(z)) => read_dict(m) for (z, m) in D["models"] ]...)
+   return ACESitePotential(models)
+end
 
 import ACEbase
 function ACEbase.evaluate_d(V::ACESiteCalc, Rs::AbstractVector{JVec{T}}, Zs, z0) where {T} 
