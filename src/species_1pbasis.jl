@@ -30,7 +30,7 @@ zlist(basis::AbstractSpecies1PBasis) = basis.zlist
 
 Species1PBasis(species) = Species1PBasis(ZList(species, static=true))
 
-Base.length(basis::AbstractSpecies1PBasis) = length(basis.zlist)^2
+Base.length(basis::AbstractSpecies1PBasis) = length(basis.zlist)
 
 function ACE.evaluate!(A, basis::Species1PBasis, X::AbstractState)
    fill!(A, false)
