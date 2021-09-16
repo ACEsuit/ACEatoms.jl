@@ -22,6 +22,9 @@ and auxiliary type to write a joint codebase for
 """
 abstract type AbstractSpecies1PBasis{NZ} <: Discrete1pBasis{Bool} end
 
+"""
+`Species1PBasis` : todo write docs 
+"""
 struct Species1PBasis{NZ} <: AbstractSpecies1PBasis{NZ}
    zlist::SZList{NZ}
 end

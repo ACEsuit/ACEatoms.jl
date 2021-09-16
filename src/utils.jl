@@ -3,6 +3,12 @@
 using ACE.Random: rand_radial, rand_sphere
 using ACE: ACEConfig
 
+"""
+`ZμRnYlm_1pbasis` : utility function to quickly generate a 
+`Zμ * Rn * Ylmn` 1-particle basis.
+
+todo - finish the docs.
+"""
 function ZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = nothing, 
                            maxL = maxdeg, 
                            Bsel = ACE.SimpleSparseBasis(1, maxdeg), 
