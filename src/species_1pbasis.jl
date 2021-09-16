@@ -30,7 +30,7 @@ zlist(basis::AbstractSpecies1PBasis) = basis.zlist
 
 Species1PBasis(species) = Species1PBasis(ZList(species, static=true))
 
-Base.length(basis::AbstractSpecies1PBasis) = length(basis.zlist)^2
+Base.length(basis::AbstractSpecies1PBasis) = length(basis.zlist)
 
 function ACE.evaluate!(A, basis::Species1PBasis, X::AbstractState)
    fill!(A, false)
@@ -51,3 +51,12 @@ degree(b, basis::AbstractSpecies1PBasis, args...) = 0
 get_index(basis::Species1PBasis, b) = z2i(basis.zlist, AtomicNumber(b.μ))
 
 Base.rand(basis::AbstractSpecies1PBasis) = rand(basis.zlist.list)
+
+write_dict(V::Species1PBasis) = 
+      Dict( "__id__" => "Species1PBasis", 
+            "zlist" => write_dict(V.zlist))
+
+function read_dict(::Val{:Species1PBasis}, D::Dict) 
+   zlist = read_dict(D["zlist"])
+   return Species1PBasis(zlist)
+end
