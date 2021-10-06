@@ -1,7 +1,7 @@
 
 
 using ACE.Random: rand_radial, rand_sphere
-using ACE: ACEConfig
+using ACE: ACEConfig, Pop1pBasis
 
 """
 `ZμRnYlm_1pbasis` : utility function to quickly generate a 
@@ -16,6 +16,24 @@ function ZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = nothing,
    RnYlm = ACE.Utils.RnYlm_1pbasis(; maxdeg=maxdeg, maxL=maxL, Bsel = Bsel, kwargs...)
    Zμ = Species1PBasis(species)
    B1p = Zμ * RnYlm
+   if init 
+      ACE.init1pspec!(B1p, Bsel)
+   end
+   return B1p
+end
+
+"""
+`PopZμRnYlm_1pbasis` : utility function to quickly generate a 
+`Pop * Zμ * Rn * Ylmn` 1-particle basis.
+"""
+function PopZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = nothing, 
+                           maxL = maxdeg, 
+                           Bsel = ACE.SimpleSparseBasis(1, maxdeg), 
+                           kwargs...)
+   RnYlm = ACE.Utils.RnYlm_1pbasis(; maxdeg=maxdeg, maxL=maxL, Bsel = Bsel, kwargs...)
+   Zμ = Species1PBasis(species)
+   Pop = Pop1pBasis()
+   B1p = Pop * Zμ * RnYlm
    if init 
       ACE.init1pspec!(B1p, Bsel)
    end
