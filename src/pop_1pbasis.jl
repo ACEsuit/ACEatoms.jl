@@ -1,15 +1,16 @@
-import ACE: OneParticleBasis, AbstractState, Scal1pBasis
+import ACE: OneParticleBasis, AbstractState, Scal1pBasis, VectorPool
 import ACE.OrthPolys: TransformedPolys
 import NamedTupleTools
 using NamedTupleTools: namedtuple
 
+export Pop1pBasis
 
 @doc raw"""
 `struct Pop1pBasis <: OneParticleBasis`
 
 One-particle basis similar to Scal1pBasis, but it has always length 1 such that P(x) = x
 """
-mutable struct Pop1pBasis{VSYM, VIDX, ISYM, T, TT, TJ} <: Scal1pBasis{T}
+mutable struct Pop1pBasis{VSYM, VIDX, ISYM, T, TT, TJ} <: OneParticleBasis{T}
    P::TransformedPolys{T, TT, TJ}
    B_pool::VectorPool{T}
    dB_pool::VectorPool{T}   

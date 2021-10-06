@@ -1,7 +1,7 @@
 
 
 using ACE.Random: rand_radial, rand_sphere
-using ACE: ACEConfig, Pop1pBasis
+using ACE: ACEConfig
 
 """
 `ZμRnYlm_1pbasis` : utility function to quickly generate a 
