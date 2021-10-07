@@ -30,13 +30,16 @@ get_index(basis::Pop1PBasis, b) = 1
 
 Base.length(basis::Pop1PBasis) = 1  # length(basis.P)
 
-_val(X::AbstractState, basis::Pop1PBasis) = X.population
+_val(X::AbstractState, basis::Pop1PBasis) = X.pop
 
 # Dict(:C => (4.0, 7.0), :H => (0.0, 2.0))
 
 # (x-(a+b)/2)/(b-a)
 
 ACE.valtype(basis::Pop1PBasis, args...) = Float64
+
+ACE.gradtype(basis::Pop1PBasis, X::AbstractState) = ACE.dstate_type(valtype(basis, X), X)
+
 
 function ACE.evaluate!(B, basis::Pop1PBasis, x::Number)
   B[1] = x 
@@ -47,6 +50,13 @@ end
 function ACE.evaluate!(B, basis::Pop1PBasis, X::AbstractState)
   return evaluate!(B, basis, _val(X, basis)) 
 end
+
+function ACE.evaluate_ed!(B, dB, basis::Pop1PBasis, X::AbstractState)
+   evaluate!(B, basis, X) 
+   dB[1] = zero(eltype(dB))
+   return B, dB 
+end
+
 
 degree(b, basis::Pop1PBasis, args...) = 0 #degree(basis.P)
 

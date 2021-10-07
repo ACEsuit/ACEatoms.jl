@@ -5,17 +5,17 @@ using Test
 
    # ----------------------
    #   pair potentials
-   include("pair/test_pair_basis.jl")
-   include("pair/test_pair_pot.jl")
-   include("pair/test_repulsion.jl")
+   @testset "PolyPairBasis" begin include("pair/test_pair_basis.jl") end 
+   @testset "PolyPairPot" begin include("pair/test_pair_pot.jl") end 
+   @testset "RepulsiveCore" begin include("pair/test_repulsion.jl") end 
 
    # ----------------------
    #   species 1p basis 
-   @testset "ACEatoms 1p Basis" include("test_1pbasis.jl") 
+   @testset "ACEatoms 1p Basis" begin include("test_1pbasis.jl")  end 
    #   basic site energy calculator
-   include("test_siteenergy.jl")
+   @testset "ACESitePotential" begin  include("test_siteenergy.jl") end 
 
    # ---------------------- 
    #  special physics 
-   include("test_electro.jl")
+   @testset "Electrostatics" begin include("test_electro.jl") end 
 end

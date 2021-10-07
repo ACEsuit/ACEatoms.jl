@@ -60,9 +60,9 @@ function PopZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = nothing,
 end
 
 _rand_atstate(mu0, Zμ, Rn, Pop) = 
-         State(mu = rand(Zμ), mu0 = mu0, 
-               rr = rand_radial(Rn) * rand_sphere() ,
-               population = rand() )
+     PopAtomState{Float64}(mu = rand(Zμ), mu0 = mu0, 
+                  rr = rand_radial(Rn) * rand_sphere(),
+                  pop = rand() )
 
 function rand_ACEConfig_pop(B1p, Nat::Integer)
    @assert Set((:μ, :n, :l, :m, :P)) == Set(ACE.symbols(B1p))

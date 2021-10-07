@@ -37,19 +37,20 @@ A = ACE.evaluate(B1p, env)
 println(@test length(A) == length(A_pop))
 
 # manual implementation: 
-A1 = sum( evaluate(B1p, X) * X.population for X in env.Xs )
+A1 = sum( evaluate(B1p, X) * X.pop for X in env.Xs )
 println(@test(A1 ≈ A_pop))
 
 ##
 @info("Range of finite difference tests")
 for species in (:X, :Si, [:Ti, :Al], [:C, :H, :O])
    @info("    species $(species)")
-   B1p = ACEatoms.ZμRnYlm_1pbasis(; species = species, maxdeg = 10, )
+   local B1p = ACEatoms.ZμRnYlm_1pbasis(; species = species, maxdeg = 10, )
    # test deserialization
    # TODO Testing.test_fio
    _rrval(x) = x.rr
 
    for ntest = 1:20
+      local Nat, env, F
       Nat = rand(5:15)
       env = rand_ACEConfig(B1p, Nat)
       Us = randn(SVector{3, Float64}, Nat)
@@ -59,12 +60,12 @@ for species in (:X, :Si, [:Ti, :Al], [:C, :H, :O])
       print_tf(@test(all(ACEbase.Testing.fdtest(F, dF, 0.0; verbose=false))))
    end
    println()
-   B1p = ACEatoms.PopZμRnYlm_1pbasis(; species = species, maxdeg = 10)
+   B1p = ACEatoms.PopZμRnYlm_1pbasis(; species = species, maxdeg = 8)
    # test deserialization
    # TODO Testing.test_fio
-   _rrval(x) = x.rr
 
    for ntest = 1:20
+      local Nat, env, F
       Nat = rand(5:15)
       env = rand_ACEConfig_pop(B1p, Nat)
       Us = randn(SVector{3, Float64}, Nat)

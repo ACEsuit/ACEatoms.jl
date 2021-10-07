@@ -1,6 +1,6 @@
 
 
-@testset "ACESitePotential" begin 
+
 
 ##
 
@@ -103,5 +103,3 @@ val1 = virial(V, at)
 virB = virial(ipbasis, at)
 val2 = sum(cc .* virB)
 println(@test val1 ≈ val2)
-
-end

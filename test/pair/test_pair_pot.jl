@@ -1,6 +1,6 @@
 
 
-@testset "PolyPairPot" begin
+
 
 @info("--------------- PolyPairPot Implementation ---------------")
 
@@ -8,7 +8,6 @@
 
 using ACE
 using ACEatoms 
-PairPotentials = ACEatoms.PairPotentials
 using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
 using JuLIP: evaluate, evaluate_d
 using JuLIP.Potentials: i2z, numz
@@ -25,7 +24,7 @@ rcut = 3.0
 
 trans = PolyTransform(1, r0)
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
-pB = PairPotentials.PolyPairBasis(Pr, :W)
+pB = ACEatoms.PairPotentials.PolyPairBasis(Pr, :W)
 coeffs = randcoeffs(pB)
 V = combine(pB, coeffs)
 
@@ -51,6 +50,7 @@ println(@test all(JuLIP.Testing.test_fio(V)))
 
 @info("      check that PolyPairBasis ≈ PolyPairPot")
 for ntest = 1:10
+   local coeffs, V 
    rattle!(at, 0.01)
    coeffs = randcoeffs(pB)
    V = combine(pB, coeffs)
@@ -77,4 +77,3 @@ rattle!(at, 0.03)
 println(@test JuLIP.Testing.fdtest(V, at))
 
 ##
-end

@@ -1,6 +1,6 @@
 
 
-@testset "RepulsiveCore" begin
+
 
 #---
 
@@ -105,4 +105,3 @@ println(@test all(JuLIP.Testing.test_fio(Vrep)))
 
 #---
 
-end

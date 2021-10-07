@@ -53,6 +53,9 @@ degree(b, basis::AbstractSpecies1PBasis, args...) = 0
 
 get_index(basis::Species1PBasis, b) = z2i(basis.zlist, AtomicNumber(b.μ))
 
+ACE.get_spec(basis::Species1PBasis, i::Integer) = (mu = basis.zlist.list[i],)
+ACE.get_spec(basis::Species1PBasis) = ACE.get_spec.(basis, 1:length(basis))
+
 Base.rand(basis::AbstractSpecies1PBasis) = rand(basis.zlist.list)
 
 write_dict(V::Species1PBasis) = 

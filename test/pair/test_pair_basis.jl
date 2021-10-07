@@ -1,6 +1,5 @@
 
 
-@testset "PolyPairBasis" begin
 
 @info("-------- Test PolyPairBasis Implementation ---------")
 
@@ -51,7 +50,7 @@ println(@test all(JuLIP.Testing.test_fio(pB)))
 
 @info("Finite-difference test on PolyPairBasis forces")
 for ntest = 1:30
-   E = energy(pB, at)
+   local E = energy(pB, at)
    DE = - forces(pB, at)
    U = [ (rand(JVecF) .- 0.5) for _=1:length(at) ]
    DExU = dot.(DE, Ref(U))
@@ -68,4 +67,3 @@ end
 println()
 ##
 
-end
