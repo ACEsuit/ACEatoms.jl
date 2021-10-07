@@ -27,7 +27,7 @@ println(@test(size(dA) == (length(A), Nat)))
 ##
 
 @info("Basic evaluation test for debugging of Pop basis set")
-B1p = ACEatoms.PopZμRnYlm_1pbasis(; maxdeg = 10, species = [:C,:O], pop_deg = 1)
+B1p = ACEatoms.PopZμRnYlm_1pbasis(; maxdeg = 10, species = [:C,:O])
 env = rand_ACEConfig_pop(B1p, Nat)
 A1 = ACE.evaluate(B1p, env)
 A, dA = ACE.evaluate_ed(B1p, env)
@@ -53,7 +53,7 @@ for species in (:X, :Si, [:Ti, :Al], [:C, :H, :O])
       print_tf(@test(all(ACEbase.Testing.fdtest(F, dF, 0.0; verbose=false))))
    end
    println()
-   B1p = ACEatoms.PopZμRnYlm_1pbasis(; species = species, maxdeg = 10, pop_deg = 1)
+   B1p = ACEatoms.PopZμRnYlm_1pbasis(; species = species, maxdeg = 10)
    # test deserialization
    # TODO Testing.test_fio
    _rrval(x) = x.rr

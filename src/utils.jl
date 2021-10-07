@@ -46,12 +46,12 @@ end
 `Pop * Zμ * Rn * Ylmn` 1-particle basis.
 """
 function PopZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = nothing, 
-                           maxL = maxdeg, pop_deg = pop_deg,
+                           maxL = maxdeg, 
                            Bsel = ACE.SimpleSparseBasis(1, maxdeg), 
                            kwargs...)
    RnYlm = ACE.Utils.RnYlm_1pbasis(; maxdeg=maxdeg, maxL=maxL, Bsel = Bsel, kwargs...)
    Zμ = Species1PBasis(species)
-   Pop = Pop1PBasis(pop_deg)
+   Pop = Pop1PBasis()
    B1p = Pop * Zμ * RnYlm
    if init 
       ACE.init1pspec!(B1p, Bsel)
@@ -66,13 +66,13 @@ AtomState{Float64}(mu = rand(Zμ),
                   population = rand())
 
 function rand_ACEConfig_pop(B1p, Nat::Integer)
-   @assert Set((:μ, :n, :l, :m)) == Set(ACE.symbols(B1p))
+   @assert Set((:μ, :n, :l, :m, :P)) == Set(ACE.symbols(B1p))
    Rn = B1p.bases[3]
    @assert Rn isa ACE.Rn1pBasis
    Zμ = B1p.bases[2] 
    @assert Zμ isa Species1PBasis
    Pop = B1p.bases[1] 
-   @assert Pop isa Pop1pBasis
+   @assert Pop isa Pop1PBasis
    
    mu0 = rand(Zμ)
    Xs = [ _rand_atstate(mu0, Zμ, Rn, Pop) for _ = 1:Nat ]
