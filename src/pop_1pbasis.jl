@@ -11,7 +11,7 @@ export Pop1PBasis
 
 One-particle basis similar to Scal1pBasis, but it has always length 1 such that P(x) = x
 """
-mutable struct Pop1PBasis{} <: OneParticleBasis{Float64}
+mutable struct Pop1PBasis <: OneParticleBasis{Float64}
   # P::TransformedPolys
 end
 
@@ -51,6 +51,6 @@ degree(b, basis::Pop1PBasis, args...) = 0 #degree(basis.P)
 write_dict(V::Pop1PBasis) = 
       Dict( "__id__" => "ACE_Pop1PBasis")
 
-function read_dict(::Val{:Pop1PBasis}, D::Dict) 
+function read_dict(::Val{:ACE_Pop1PBasis}, D::Dict) 
    return Pop1PBasis()
 end
