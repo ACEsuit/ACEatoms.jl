@@ -11,13 +11,20 @@ export Pop1PBasis
 
 One-particle basis similar to Scal1pBasis, but it has always length 1 such that P(x) = x
 """
-mutable struct Pop1PBasis{T} <: OneParticleBasis{T} 
+mutable struct Pop1PBasis{TransformedPolys} <: OneParticleBasis{TransformedPolys}
   P::TransformedPolys
-  # B_pool::VectorPool I am not too sure about this
 end
 
+symbols(basis::Pop1PBasis) = [:μ]
+
+indexrange(basis::Pop1PBasis) = Dict( :μ => length(basis) )
+
+#_getidx(b, basis::Pop1PBasis) = b[_idxsym(basis) ]
+
+isadmissible(b, basis::Pop1PBasis) = (1 <= _getidx(b, basis) <= length(basis))
+
 function Pop1PBasis(num_basis::Int)
-  P = transformed_jacobi(num_basis, IdTransform(), 120.0, 0.0)
+  P = transformed_jacobi(num_basis, IdTransform(), 0.0, 0.0)
   return Pop1PBasis(P)
 end
 
