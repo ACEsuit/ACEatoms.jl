@@ -4,7 +4,7 @@
 
 using ACE, ACEatoms, JuLIP, LinearAlgebra, ACEbase, Test
 using ACEatoms: Species1PBasis, ZμRnYlm_1pbasis, AtomState,
-                rand_environment, PopZμRnYlm_1pbasis
+                rand_ACEConfig, PopZμRnYlm_1pbasis, rand_ACEConfig_pop
 using ACEbase.Testing
 using ACE: evaluate, evaluate_d
 using StaticArrays
@@ -18,7 +18,7 @@ notdot(a::Number, b::Number) = a * b
 @info("Basic evaluation test for debugging")
 Nat = 2
 B1p = ACEatoms.ZμRnYlm_1pbasis(; maxdeg = 10, species = [:C,:O])
-env = rand_environment(B1p, Nat)
+env = rand_ACEConfig(B1p, Nat)
 A1 = ACE.evaluate(B1p, env)
 A, dA = ACE.evaluate_ed(B1p, env)
 println(@test(A ≈ A1))
@@ -27,8 +27,8 @@ println(@test(size(dA) == (length(A), Nat)))
 ##
 
 @info("Basic evaluation test for debugging of Pop basis set")
-B1p = ACEatoms.PopZμRnYlm_1pbasis(; maxdeg = 10, species = [:C,:O])
-env = rand_environment(B1p, Nat)
+B1p = ACEatoms.PopZμRnYlm_1pbasis(; maxdeg = 10, species = [:C,:O], pop_deg = 1)
+env = rand_ACEConfig_pop(B1p, Nat)
 A1 = ACE.evaluate(B1p, env)
 A, dA = ACE.evaluate_ed(B1p, env)
 println(@test(A ≈ A1))
@@ -45,7 +45,7 @@ for species in (:X, :Si, [:Ti, :Al], [:C, :H, :O])
 
    for ntest = 1:20
       Nat = rand(5:15)
-      env = rand_environment(B1p, Nat)
+      env = rand_ACEConfig(B1p, Nat)
       Us = randn(SVector{3, Float64}, Nat)
       c = randn(length(B1p))
       F = t -> notdot(c, ACE.evaluate(B1p, inc_env(env, t * Us)))
@@ -53,14 +53,14 @@ for species in (:X, :Si, [:Ti, :Al], [:C, :H, :O])
       print_tf(@test(all(ACEbase.Testing.fdtest(F, dF, 0.0; verbose=false))))
    end
    println()
-   B1p = ACEatoms.PopZμRnYlm_1pbasis(; species = species, maxdeg = 10, )
+   B1p = ACEatoms.PopZμRnYlm_1pbasis(; species = species, maxdeg = 10, pop_deg = 1)
    # test deserialization
    # TODO Testing.test_fio
    _rrval(x) = x.rr
 
    for ntest = 1:20
       Nat = rand(5:15)
-      env = rand_environment(B1p, Nat)
+      env = rand_ACEConfig_pop(B1p, Nat)
       Us = randn(SVector{3, Float64}, Nat)
       c = randn(length(B1p))
       F = t -> notdot(c, ACE.evaluate(B1p, inc_env(env, t * Us)))
