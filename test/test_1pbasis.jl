@@ -1,4 +1,3 @@
-@testset "ACEatoms.jl" begin
 
 ##
 
@@ -27,12 +26,19 @@ println(@test(size(dA) == (length(A), Nat)))
 ##
 
 @info("Basic evaluation test for debugging of Pop basis set")
-B1p = ACEatoms.PopZμRnYlm_1pbasis(; maxdeg = 10, species = [:C,:O])
-env = rand_ACEConfig_pop(B1p, Nat)
-A1 = ACE.evaluate(B1p, env)
-A, dA = ACE.evaluate_ed(B1p, env)
-println(@test(A ≈ A1))
-println(@test(size(dA) == (length(A), Nat)))
+maxdeg = 6
+Bsel = ACE.SimpleSparseBasis(1, maxdeg)
+B1p_pop = ACEatoms.PopZμRnYlm_1pbasis(; maxdeg=maxdeg, species = [:C,:O])
+B1p = ACE.Product1pBasis( tuple(B1p_pop.bases[2:end]...) )
+ACE.init1pspec!(B1p, Bsel)
+env = rand_ACEConfig_pop(B1p_pop, Nat)
+A_pop = ACE.evaluate(B1p_pop, env)
+A = ACE.evaluate(B1p, env)
+println(@test length(A) == length(A_pop))
+
+# manual implementation: 
+A1 = sum( evaluate(B1p, X) * X.population for X in env.Xs )
+println(@test(A1 ≈ A_pop))
 
 ##
 @info("Range of finite difference tests")
@@ -71,4 +77,3 @@ for species in (:X, :Si, [:Ti, :Al], [:C, :H, :O])
 end
 
 ##
-end

@@ -36,6 +36,8 @@ _val(X::AbstractState, basis::Pop1PBasis) = X.population
 
 # (x-(a+b)/2)/(b-a)
 
+ACE.valtype(basis::Pop1PBasis, args...) = Float64
+
 function ACE.evaluate!(B, basis::Pop1PBasis, x::Number)
   B[1] = x 
   return B
@@ -43,7 +45,7 @@ function ACE.evaluate!(B, basis::Pop1PBasis, x::Number)
 end
 
 function ACE.evaluate!(B, basis::Pop1PBasis, X::AbstractState)
-  return evaluate!(B, basis.P, _val(X, basis)) 
+  return evaluate!(B, basis, _val(X, basis)) 
 end
 
 degree(b, basis::Pop1PBasis, args...) = 0 #degree(basis.P)

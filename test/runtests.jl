@@ -11,7 +11,7 @@ using Test
 
    # ----------------------
    #   species 1p basis 
-   include("test_1pbasis.jl")
+   @testset "ACEatoms 1p Basis" include("test_1pbasis.jl") 
    #   basic site energy calculator
    include("test_siteenergy.jl")
 
