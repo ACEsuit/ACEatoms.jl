@@ -6,7 +6,8 @@ import ACE: OneParticleBasis,
             indexrange,
             isadmissible,
             degree,
-            get_index
+            get_index,
+            get_spec
 
 import ACEbase: Discrete1pBasis
 
@@ -52,6 +53,12 @@ isadmissible(b, basis::Species1PBasis) = (AtomicNumber(b.μ) in basis.zlist.list
 degree(b, basis::AbstractSpecies1PBasis, args...) = 0
 
 get_index(basis::Species1PBasis, b) = z2i(basis.zlist, AtomicNumber(b.μ))
+
+function ACE.get_spec(basis::Species1PBasis, i)
+   return NamedTuple{(:μ,)}((i2z(basis.zlist, i),))
+end
+
+ACE.get_spec(basis::Species1PBasis) = [ get_spec(basis, i) for i = 1:length(basis) ]
 
 Base.rand(basis::AbstractSpecies1PBasis) = rand(basis.zlist.list)
 
