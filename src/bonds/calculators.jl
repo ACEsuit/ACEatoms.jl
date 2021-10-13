@@ -1,10 +1,5 @@
 
-"""
-Given a bond (i, j) it has an environment {k} which could be 
-cylindrical, ellipsoidal, ...  
-The ball B(ri, rcut_env) must be a superset of this environment.
-"""
-function cutoff_env end 
+import ACE: cutoff_env 
 
 function prepare_bondcalc(model, at)
    rcut_b = cutoff(model)
