@@ -34,6 +34,17 @@ struct ESPot{TEV} <: AbstractCalculator
   dipoleevaluator::TEV
 end
 
+write_dict(V::ESPot) = Dict("__id__" => "ACEatoms_ESPot",
+                           "dipoleevaluator" => write_dict(V.dipoleevaluator))
+
+function read_dict(::Val{:ACEatoms_ESPot}, D::Dict) 
+  dipoleevaluator = read_dict(D["dipoleevaluator"])
+  return ESPot(dipoleevaluator)
+end
+
+==(V1::ESPot, V2::ESPot) = 
+      (V1.dipoleevaluator == V2.dipoleevaluator)
+
 function energy(V::ESPot, at::Atoms) 
   # get dipoles with dipole evaluator, and than get energy
   pos = positions(at)

@@ -5,7 +5,7 @@
 ##
 
 using ACE, JuLIP, ACEatoms, ACEbase, Test, LinearAlgebra, StaticArrays
-using ACE: evaluate, evaluate_d, SymmetricBasis, NaiveTotalDegree, PIBasis
+using ACE: evaluate, evaluate_d, SymmetricBasis, SimpleSparseBasis, PIBasis
 #using ACEbase.Testing: fdtest
 using JuLIP.Testing
 using ACEatoms.Electrostatics: FixedChargeDipole, ESPot
@@ -14,16 +14,15 @@ using ACEatoms.Electrostatics: FixedChargeDipole, ESPot
 
 # construct the 1p-basis
 @info("Construcing a Linear ACE Model")
-D = NaiveTotalDegree()
 maxdeg = 6
 ord = 3   # 4-body
+Bsel = SimpleSparseBasis(ord, maxdeg)
 species = [:Ti, :Al]
-B1p = ACEatoms.ZμRnYlm_1pbasis(; species = species, maxdeg=maxdeg, D = D, 
+B1p = ACEatoms.ZμRnYlm_1pbasis(; species = species, maxdeg=maxdeg,
                                  rin = 1.2, rcut = 5.0)
-ACE.init1pspec!(B1p, maxdeg = maxdeg, Deg = ACE.NaiveTotalDegree())
-φ = ACE.EuclideanVector{ComplexF64}()
-pibasis = PIBasis(B1p, ord, maxdeg; property = φ, isreal = false)
-basis = SymmetricBasis(pibasis, φ, isreal=true)
+ACE.init1pspec!(B1p, Bsel)
+φ = ACE.EuclideanVector{Float64}()
+basis = SymmetricBasis(φ, B1p, Bsel)
 cTi = randn(length(basis))
 cAl = randn(length(basis))
 models = Dict(:Ti => ACE.LinearACEModel(basis, cTi; evaluator = :standard), 
@@ -115,6 +114,11 @@ F = ACEatoms.Electrostatics.electrostatic_forces(pos, qs, mus, 1.0)[1]
 println(@test isapprox(E_lammps, E, rtol=1e-7))
 println(@test isapprox(F_lammps[1], F[1], rtol=1e-7) && isapprox(F_lammps[2], F[2], rtol=1e-7) && isapprox(F_lammps[3], F[3], rtol=1e-7))
 
+
+##
+
+@info("test (de-)dictionisation of Dipole potential")
+println(@test all(JuLIP.Testing.test_fio(Vtot)))
 
 ##
 
