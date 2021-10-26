@@ -75,6 +75,7 @@ function rand_ACEConfig_pop(B1p, Nat::Integer)
    mu0 = rand(Zμ)
    Xs = [ _rand_atstate(mu0, Zμ, Rn, Pop) for _ = 1:Nat ]
    return ACEConfig(Xs)
+end
 
 function pair_basis(; species = :X,
    # transform parameters
