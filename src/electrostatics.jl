@@ -13,9 +13,11 @@ using StaticArrays
 using ACEatoms, ACE
 using SpecialFunctions: erf
 import JuLIP: energy, forces
+import ACE: write_dict, read_dict
 
 export get_dipole, electrostatic_energy, electrostatic_forces, soft_coulomb, 
-        soft_q_μ, soft_μ_μ, soft_q_μ2, dipole, FixedChargeDipole, energy, forces
+        soft_q_μ, soft_μ_μ, soft_q_μ2, dipole, FixedChargeDipole, energy, forces,
+        write_dict, read_dict
 
 const μ_0 = 4.0e-7 * π
 const c = 299792458.0
