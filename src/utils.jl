@@ -1,5 +1,4 @@
 
-
 using ACE.Random: rand_radial, rand_sphere
 using ACE: ACEConfig, State 
 
@@ -76,4 +75,18 @@ function rand_ACEConfig_pop(B1p, Nat::Integer)
    mu0 = rand(Zμ)
    Xs = [ _rand_atstate(mu0, Zμ, Rn, Pop) for _ = 1:Nat ]
    return ACEConfig(Xs)
+
+function pair_basis(; species = :X,
+   # transform parameters
+   r0 = 2.5,
+   trans = PolyTransform(2, r0),
+   # degree parameters
+   maxdeg = 8,
+   # radial basis parameters
+   rcut = 5.0,
+   rin = 0.5 * r0,
+   pcut = 2,
+   pin = 0,
+   rbasis = transformed_jacobi(maxdeg, trans, rcut, rin; pcut=pcut, pin=pin))
+   return PolyPairBasis(rbasis, species)
 end
