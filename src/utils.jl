@@ -2,7 +2,7 @@
 
 using ACE.Random: rand_radial, rand_sphere
 using ACE: ACEConfig, State 
-
+using ACE.Utils: BondBasisSelector, RnYlm_1pbasis
 """
 `ZμRnYlm_1pbasis` : utility function to quickly generate a 
 `Zμ * Rn * Ylmn` 1-particle basis.
@@ -76,4 +76,23 @@ function rand_ACEConfig_pop(B1p, Nat::Integer)
    mu0 = rand(Zμ)
    Xs = [ _rand_atstate(mu0, Zμ, Rn, Pop) for _ = 1:Nat ]
    return ACEConfig(Xs)
+end
+
+
+#isym=:be, bond_weight = 1.0, env_weight = 1.0)
+function SymmetricBondSpecies_basis(ϕ::ACE.AbstractProperty, env::ACE.BondEnvelope, Bsel::ACE.SparseBasis; species = nothing, RnYlm = nothing, kwargs...)
+   BondSelector =  BondBasisSelector(Bsel; kwargs...)
+   if RnYlm === nothing
+       RnYlm = RnYlm_1pbasis(;   r0 = ACE.cutoff_radialbasis(env), 
+                                           rin = 0.0,
+                                           trans = PolyTransform(2, ACE.cutoff_radialbasis(env)), 
+                                           pcut = 2,
+                                           pin = 0, 
+                                           kwargs...
+                                       )
+   end
+   Zμ = Species1PBasis(species)
+   Bc = ACE.Categorical1pBasis([:bond, :env]; varsym = :be, idxsym = :be )
+   B1p = Zμ * Bc * RnYlm * env
+   return ACE.SymmetricBasis(ϕ, B1p, BondSelector)
 end
