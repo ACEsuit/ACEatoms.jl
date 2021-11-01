@@ -88,7 +88,7 @@ forces(Vtot, at)
 ##
 
 # fdtest(Vtot, at, verbose=true)
-println(@test fdtest(Vtot, at, verbose=true))
+println(@test JuLIP.Testing.fdtest(Vtot, at, verbose=true))
 
 ##
 
@@ -112,7 +112,6 @@ println(@test isapprox(F_lammps[1], F[1], rtol=1e-7) && isapprox(F_lammps[2], F[
 
 @info("test (de-)dictionisation of Dipole potential")
 println(@test all(JuLIP.Testing.test_fio(Vtot)))
-
 
 ##
 

@@ -42,6 +42,7 @@ function read_dict(::Val{:ACEatoms_ESPot}, D::Dict)
   return ESPot(dipoleevaluator)
 end
 
+import Base: == 
 ==(V1::ESPot, V2::ESPot) = 
       all(V1.dipoleevaluator.components .== V2.dipoleevaluator.components)
 
@@ -202,6 +203,9 @@ function soft_coulomb(Rij::AbstractArray, q1::Real, q2::Real, λ::Real=0.0, α::
   return q1 * q2 / (4*π*ϵ_0 * (α * (1 - λ)^2 + dot(Rij, Rij))^0.5) * e * 1e10
 end
 
+soft_coulomb(R1::AbstractVector, q1::Real, R2::AbstractVector, q2::Real, args...) = 
+    soft_coulomb(R1 - R2, q1, q2, args...)
+
 function force_q_q(Rij::AbstractArray, q1::Real, q2::Real, λ::Real=0.0, α::Real=10.0)
   return Zygote.gradient(r -> soft_coulomb(r, q1, q2, λ, α), Rij)
 end
@@ -229,6 +233,9 @@ Rji = Ri - Rj vector
 function soft_q_μ(Rji::AbstractArray, q1::Real, μ::AbstractArray, λ::Real=0.0, α::Real=10.0)
   return q1 * dot(μ, Rji) / (4*π*ϵ_0 * (α * (1 - λ)^2 + dot(Rji, Rji))^1.5) * (1e-1/c_light)
 end
+
+soft_q_μ(R1::AbstractArray, q1::Real, R2::AbstractArray, μ::AbstractArray, args...) = 
+      soft_q_μ(R1 - R2, q1, μ, args...)
 
 function force_q_μ(Rji::AbstractArray, q1::Real, μ::AbstractArray, λ::Real=0.0, α::Real=10.0)
   return Zygote.gradient((r, mu) -> soft_q_μ(r, q1, mu, λ, α), Rji, μ)
