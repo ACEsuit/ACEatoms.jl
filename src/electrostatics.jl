@@ -43,7 +43,7 @@ function read_dict(::Val{:ACEatoms_ESPot}, D::Dict)
 end
 
 ==(V1::ESPot, V2::ESPot) = 
-      (V1.dipoleevaluator == V2.dipoleevaluator)
+      all(V1.dipoleevaluator.components .== V2.dipoleevaluator.components)
 
 function energy(V::ESPot, at::Atoms) 
   # get dipoles with dipole evaluator, and than get energy
@@ -78,8 +78,8 @@ function forces(V::ESPot, at::Atoms)
   Fs = zeros(JVec{Float64}, length(at))   # forces 
   fs = zeros(JVec{Float64}, length(at))   # fs[i] <- ∂E / ∂μ[i]
   maxN = JuLIP.maxneigs(nlist)
-  tmpd = ACE.alloc_temp_d(V.dipoleevaluator.components[2], maxN)
-  dVc = zeros(SMatrix{3,3,ComplexF64}, maxN)
+  # tmpd = ACE.alloc_temp_d(V.dipoleevaluator.components[2], maxN)
+  # dVc = zeros(SMatrix{3,3,ComplexF64}, maxN)
   dV = zeros(SMatrix{3,3,Float64}, maxN)
 
   for i = 1:length(at)
@@ -107,8 +107,9 @@ function forces(V::ESPot, at::Atoms)
   for i = 1:length(at)
     Js, Rs, Zs = JuLIP.Potentials.neigsz(nlist, at, i)
     z0 = at.Z[i]
-    ACE.evaluate_d!(dVc, tmpd, V.dipoleevaluator.components[2], Rs, Zs, z0)
-    map!(dv -> real.(dv), dV, dVc)
+    # ACE.grad_config(dV, V.dipoleevaluator.components[2], Rs, Zs, z0)
+    # map!(dv -> real.(dv), dV, dVc)
+    dV = ACE.evaluate_d(V.dipoleevaluator.components[2], Rs, Zs, z0)
 
     for (j, dVij) in zip(Js, dV)
       Fs[j] -= transpose(dVij) * fs[i]
@@ -148,7 +149,7 @@ calculated using the soft core potentials.
 λ = 1.0 returns the non-soft core version.
 """
 function electrostatic_energy(pos::AbstractArray, charges::AbstractArray, dipoles::AbstractArray, λ::Real, pbc::Bool=false)
-  @assert pbc == false "Periodic boundary condition not yet supported"
+  @assert (!pbc) "Periodic boundary condition not yet supported"
   qq = 0.0
   qμ = 0.0
   μμ = 0.0
@@ -170,7 +171,7 @@ calculated using the soft core potentials.
 λ = 1.0 returns the non-soft core version.
 """
 function electrostatic_forces(pos::AbstractArray, charges::AbstractArray, dipoles::AbstractArray, λ::Real, pbc::Bool=false)
-  @assert pbc == false "Periodic boundary condition not yet supported"
+  if pbc; error("Periodic boundary condition not yet supported"); end 
   Fs = zeros(JVec{Float64}, length(charges))
   for (i, R) in enumerate(pos)
     for j = (i+1):length(pos)

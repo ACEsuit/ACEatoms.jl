@@ -20,9 +20,9 @@ Bsel = SimpleSparseBasis(ord, maxdeg)
 species = [:Ti, :Al]
 B1p = ACEatoms.ZμRnYlm_1pbasis(; species = species, maxdeg=maxdeg,
                                  rin = 1.2, rcut = 5.0)
-ACE.init1pspec!(B1p, Bsel)
 φ = ACE.EuclideanVector{Float64}()
 basis = SymmetricBasis(φ, B1p, Bsel)
+
 cTi = randn(length(basis))
 cAl = randn(length(basis))
 models = Dict(:Ti => ACE.LinearACEModel(basis, cTi; evaluator = :standard), 
@@ -66,14 +66,7 @@ println(@test( sum( b .* cc ) ≈ ACEatoms.dipole(V, at) ))
 
 ##
 
-# unclear right now how to properly generalize the 
-# default `evaluate_d` code, so can we please use the 
-# manual-allocating version.
-
-tmpd = ACE.alloc_temp_d(V, length(Rs))
-dV = zeros(SMatrix{3,3,ComplexF64}, length(Rs))
-ACE.evaluate_d!(dV, tmpd, V, Rs, Zs, z0)
-
+ACE.evaluate_d(V, Rs, Zs, z0)
 
 ##
 
@@ -94,8 +87,8 @@ forces(Vtot, at)
 
 ##
 
-fdtest(Vtot, at, verbose=true)
-# println(@test fdtest(Vtot, at, verbose=true))
+# fdtest(Vtot, at, verbose=true)
+println(@test fdtest(Vtot, at, verbose=true))
 
 ##
 
@@ -119,6 +112,7 @@ println(@test isapprox(F_lammps[1], F[1], rtol=1e-7) && isapprox(F_lammps[2], F[
 
 @info("test (de-)dictionisation of Dipole potential")
 println(@test all(JuLIP.Testing.test_fio(Vtot)))
+
 
 ##
 

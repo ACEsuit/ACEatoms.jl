@@ -3,9 +3,9 @@ using JuLIP: neighbourlist, cutoff
 using ACEatoms.Electrostatics: FixedChargeDipole, c_light, e
 using JuLIP
 
-_myreal(mu::ACE.EuclideanVector) = real.(mu.val)
+# _myreal(mu::ACE.EuclideanVector) = real.(mu.val)
 
-_myreal(mu::AbstractVector{<: ACE.EuclideanVector}) = _myreal.(mu)
+# _myreal(mu::AbstractVector{<: ACE.EuclideanVector}) = _myreal.(mu)
 
 # experimental dipole function 
 # this assumes that the underlying ACE model is covariant and 
@@ -15,7 +15,7 @@ function dipole(V::ACESitePotential, at::Atoms)
    mu = sum( evaluate(V.models[at.Z[i]], 
                         environment(V, at, nlist, i)[1])
              for i = 1:length(at) )
-   return _myreal(mu)
+   return mu.val 
 end
 
 
@@ -26,7 +26,7 @@ function dipole(B::ACESitePotentialBasis, at::Atoms)
       z0 = at.Z[i]
       env, _ = environment(B, at, nlist, i)
       mu = evaluate(B.models[z0], env) 
-      MU[B.inds[z0]] .+= _myreal(mu)
+      MU[B.inds[z0]] .+= mu
    end
    return MU
 end
@@ -73,8 +73,8 @@ function atomic_dipole(V::ACESitePotential, at::Atoms)
    mu = zeros(SVector{3, Float64}, length(at) )
    nlist = neighbourlist(at, cutoff(V))
    for i = 1:length(at)
-      mu[i] = _myreal(evaluate(V.models[at.Z[i]], 
-                        environment(V, at, nlist, i)[1]))
+      mu[i] = evaluate(V.models[at.Z[i]], 
+                       environment(V, at, nlist, i)[1])
    end
    return mu
 end

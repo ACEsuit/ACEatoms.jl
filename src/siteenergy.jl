@@ -117,9 +117,8 @@ end
 import ACEbase
 function ACEbase.evaluate_d(V::ACESiteCalc, Rs::AbstractVector{JVec{T}}, Zs, z0) where {T} 
    env = environment(V, Rs, Zs, z0)
-   dV = zeros(JVec{T}, length(Rs))
-   ACE.grad_config!(dV, V.models[z0], env)
-   return dV 
+   dV = ACE.grad_config(V.models[z0], env)
+   return [ dv.rr for dv in dV ] 
 end
 
 function evaluate_d!(dV, _tmpd, V::ACESitePotential, Rs, Zs, z0) 
