@@ -38,14 +38,14 @@ function dipole(Vref::FixedChargeDipole, at::Atoms)
    MU = zeros(SVector{3, Float64})
    if has_data(at, :Q)
       Q = get_data(at, :Q)::Vector{Float64}
-      MU += sum(Q .* positions(at) .* (1e-11/c_light/e), dims = 1)[1]
+      MU += sum(Q .* positions(at) , dims = 1)[1]
    end
    # if has_data(at, :mu)
    #    @warn "Using fixed dipoles found in Atoms object"
    #    at_mus = get_data(at, :mu)::Vector{SVector{3, Float64}}
    #    mu += sum(at_mus, dims = 1)[1]
    # end
-   return MU
+   return MU / 0.2081943 # conversion number copied from wikipedia
 end
 
 function dipole(IP::JuLIP.MLIPs.SumIP{Any}, at::Atoms{Float64})
