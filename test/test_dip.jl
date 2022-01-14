@@ -9,6 +9,7 @@ using ACE: evaluate, evaluate_d, SymmetricBasis, SimpleSparseBasis, PIBasis
 #using ACEbase.Testing: fdtest
 using JuLIP.Testing
 using ACEatoms.Electrostatics: FixedChargeDipole, ESPot
+using ACEbase.Testing 
 
 ##
 
@@ -52,7 +53,7 @@ env1 = ACEatoms.environment(V, Rs, Zs, z0)
 ACEbase._allfieldsequal(env1, env)
 v1 = evaluate(models[sym], env).val
 v2 = evaluate(V, Rs, Zs, z0)
-println(@test v1 ≈ v2)
+println_slim(@test v1 ≈ v2)
 
 cc = [cTi; cAl]
 ACE.set_params!(V, cc)
@@ -62,7 +63,7 @@ ACEatoms.dipole(V, at)
 
 B = ACEatoms.basis(V)
 b = ACEatoms.dipole(B, at)
-println(@test( sum( b .* cc ) ≈ ACEatoms.dipole(V, at) ))
+println_slim(@test( sum( b .* cc ) ≈ ACEatoms.dipole(V, at) ))
 
 ##
 
@@ -88,7 +89,7 @@ forces(Vtot, at)
 ##
 
 # fdtest(Vtot, at, verbose=true)
-println(@test JuLIP.Testing.fdtest(Vtot, at, verbose=true))
+println_slim(@test JuLIP.Testing.fdtest(Vtot, at, verbose=true))
 
 ##
 
@@ -104,14 +105,14 @@ F_lammps = [4.98417434  -3.94540391  15.64287807]
 E = ACEatoms.Electrostatics.electrostatic_energy(pos, qs, mus, 1.0)
 F = ACEatoms.Electrostatics.electrostatic_forces(pos, qs, mus, 1.0)[1]
 
-println(@test isapprox(E_lammps, E, rtol=1e-7))
-println(@test isapprox(F_lammps[1], F[1], rtol=1e-7) && isapprox(F_lammps[2], F[2], rtol=1e-7) && isapprox(F_lammps[3], F[3], rtol=1e-7))
+println_slim(@test isapprox(E_lammps, E, rtol=1e-7))
+println_slim(@test isapprox(F_lammps[1], F[1], rtol=1e-7) && isapprox(F_lammps[2], F[2], rtol=1e-7) && isapprox(F_lammps[3], F[3], rtol=1e-7))
 
 
 ##
 
 @info("test (de-)dictionisation of Dipole potential")
-println(@test all(JuLIP.Testing.test_fio(Vtot)))
+println_slim(@test all(JuLIP.Testing.test_fio(Vtot)))
 
 ##
 
