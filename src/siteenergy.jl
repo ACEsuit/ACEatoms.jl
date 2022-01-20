@@ -2,6 +2,7 @@
 
 import JuLIP.Potentials: SitePotential
 import ACE: ACEConfig 
+import ACEbase: OneParticleBasis
 
 # TODO: nasty hack - must fix this!!!
 
@@ -11,8 +12,9 @@ cutoff(basis::ACE.SymmetricBasis) = cutoff(basis.pibasis)
 
 cutoff(basis::ACE.PIBasis) = cutoff(basis.basis1p)
 
-cutoff(B1p::ACE.Product1pBasis) = cutoff(B1p.bases[2])
+cutoff(B1p::ACE.Product1pBasis) = minimum(cutoff.(B1p.bases))
 
+cutoff(B1p::OneParticleBasis) = Inf
 cutoff(Rn::ACE.Rn1pBasis) = cutoff(Rn.R)
 
 # already defined in pair potentials 
