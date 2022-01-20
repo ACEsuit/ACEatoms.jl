@@ -6,7 +6,7 @@
 
 using ACE, JuLIP, ACEatoms, ACEbase, Test, LinearAlgebra
 using ACE: evaluate, evaluate_d, SymmetricBasis, SimpleSparseBasis, PIBasis
-using ACEbase.Testing: fdtest
+using ACEbase.Testing: fdtest, println_slim 
 
 
 ##
@@ -35,7 +35,7 @@ V = ACEatoms.ACESitePotential(models)
 
 @info("Check FIO")
 using ACEbase.Testing: test_fio 
-println(@test(all(test_fio(V; warntype = false))))
+println_slim(@test(all(test_fio(V; warntype = false))))
 
 ##
 
@@ -58,7 +58,7 @@ env1 = ACEatoms.environment(V, Rs, Zs, z0)
 ACEbase._allfieldsequal(env1, env)
 v1 = evaluate(models[sym], env).val
 v2 = evaluate(V, Rs, Zs, z0)
-println(@test v1 ≈ v2)
+println_slim(@test v1 ≈ v2)
 energy(V, at)
 
 
@@ -69,14 +69,14 @@ dv1 = ACE.grad_config!(dEs, V.models[z0], env)
 dv2 = JuLIP.evaluate_d!(dEs, nothing, V, Rs, Zs, z0)
 dv3 = evaluate_d(V, Rs, Zs, z0)
 
-println(@test(dv1 ≈ dv2))
-println(@test(dv1 ≈ dv3))
+println_slim(@test(dv1 ≈ dv2))
+println_slim(@test(dv1 ≈ dv3))
 
 forces(V, at)
 ##
 
 @info("Finite-difference test on total energy")
-println(@test JuLIP.Testing.fdtest(V, at))
+println_slim(@test JuLIP.Testing.fdtest(V, at))
 
 ##
 
@@ -90,16 +90,16 @@ cc = [cTi; cAl]
 @info("  ... energy")
 val1 = energy(V, at)
 val2 = sum(cc .* energy(ipbasis, at))
-println(@test (val1 ≈ val2))
+println_slim(@test (val1 ≈ val2))
 
 @info("  ... forces")
 val1 = forces(V, at)
 frcB = forces(ipbasis, at)
 val2 = sum(cc .* frcB)
-println(@test val1 ≈ val2)
+println_slim(@test val1 ≈ val2)
 
 @info("  ... virial")
 val1 = virial(V, at)
 virB = virial(ipbasis, at)
 val2 = sum(cc .* virB)
-println(@test val1 ≈ val2)
+println_slim(@test val1 ≈ val2)
