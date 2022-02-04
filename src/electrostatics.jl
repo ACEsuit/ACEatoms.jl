@@ -53,11 +53,11 @@ function energy(V::ESPot, at::Atoms)
   if has_data(at, :Q)
     Qs = get_data(at, :Q)::Vector{Float64} 
   end
-  return electrostatic_energy(pos, Qs, mus, 0.0)  # Set λ=0.0 as a default, may need to change later
+  return electrostatic_energy(pos, Qs, mus, 0.0)  # Set λ=0.0 as a default, may need to change later, NOT USED NOW
 end
 
 function forces(V::ESPot, at::Atoms) 
-  λ = 0.0  # a sensible looking default for the soft core parameter
+  λ = 0.0  # a sensible looking default for the soft core parameter, NOW USED NOW
   pos = positions(at)
   # CO: I don't like `V.dipoleevaluator.components[2]` at all, it feels very 
   #     fragile. -> to discuss!!        
@@ -86,20 +86,20 @@ function forces(V::ESPot, at::Atoms)
   for i = 1:length(at)
     for j = (i+1):length(at) 
       Rij = pos[i] - pos[j]
-      fqμ1 = force_q_μ(Rij, Qs[i], mus[j], λ)  # -> (DRij, Dmu)
+      fqμ1 = force_q_μ(Rij, Qs[i], mus[j], 0.35, 4.5)  # -> (DRij, Dmu)
       Fs[i] -= fqμ1[1]
       Fs[j] += fqμ1[1]
       fs[j] += fqμ1[2]
-      fqμ2 = force_q_μ(-1.0 .* Rij, Qs[j], mus[i], λ)
+      fqμ2 = force_q_μ(-1.0 .* Rij, Qs[j], mus[i], 0.35, 4.5)
       Fs[i] += fqμ2[1]
       Fs[j] -= fqμ2[1]
       fs[i] += fqμ2[2]
-      fμμ = force_μ_μ(Rij, mus[i], mus[j], λ)
+      fμμ = force_μ_μ(Rij, mus[i], mus[j], 0.35, 5.0)
       Fs[i] -= fμμ[1]
       Fs[j] += fμμ[1]  
       fs[i] += fμμ[2]
       fs[j] += fμμ[3]
-      fqq = force_q_q(Rij, Qs[i], Qs[j], λ)[1]
+      fqq = force_q_q_gauss(Rij, Qs[i], Qs[j], 1.25, 1.25)[1]
       Fs[i] -= fqq
       Fs[j] += fqq
     end 
@@ -147,7 +147,7 @@ read_dict(::Val{:ACEatoms_FixedChargeDipole}, D::Dict) = FixedChargeDipole()
 """
 Total electrostatic enenrgy of a set of point charges and point dipoles
 calculated using the soft core potentials. 
-λ = 1.0 returns the non-soft core version.
+λ = 1.0 returns the non-soft core version. (NOT USED NOW, I set different defaults for the components)
 """
 function electrostatic_energy(pos::AbstractArray, charges::AbstractArray, dipoles::AbstractArray, λ::Real, pbc::Bool=false)
   @assert (!pbc) "Periodic boundary condition not yet supported"
@@ -157,10 +157,10 @@ function electrostatic_energy(pos::AbstractArray, charges::AbstractArray, dipole
   for (i, R) in enumerate(pos)
     for j = (i+1):length(pos)
       Rij = R - pos[j]
-      qq += soft_coulomb(Rij, charges[i], charges[j], λ)
-      qμ += soft_q_μ(Rij, charges[i], dipoles[j], λ)
-      qμ += soft_q_μ(-1.0 .* Rij, charges[j], dipoles[i], λ)
-      μμ += soft_μ_μ(Rij, dipoles[i], dipoles[j], λ)
+      qq += gauss_coulomb(Rij, charges[i], charges[j], 1.25, 1.25)  # sensible defaults
+      qμ += soft_q_μ(Rij, charges[i], dipoles[j], 0.35, 4.5)  # sensible defaults
+      qμ += soft_q_μ(-1.0 .* Rij, charges[j], dipoles[i], 0.35, 4.5)  # sensible defaults 
+      μμ += soft_μ_μ(Rij, dipoles[i], dipoles[j], 0.35, 5.0)  # sensible defaults 
     end
   end
   return qq + qμ + μμ
@@ -169,7 +169,7 @@ end
 """
 Electrostatic forces of a set of FIXED point charges and FIXED point dipoles
 calculated using the soft core potentials. 
-λ = 1.0 returns the non-soft core version.
+λ = 1.0 returns the non-soft core version.  (NOT USED NOW, I set different defaults for the components)
 """
 function electrostatic_forces(pos::AbstractArray, charges::AbstractArray, dipoles::AbstractArray, λ::Real, pbc::Bool=false)
   if pbc; error("Periodic boundary condition not yet supported"); end 
@@ -177,16 +177,16 @@ function electrostatic_forces(pos::AbstractArray, charges::AbstractArray, dipole
   for (i, R) in enumerate(pos)
     for j = (i+1):length(pos)
       Rij = R - pos[j]
-      fqq = force_q_q(Rij,charges[i], charges[j], λ)[1]
+      fqq = force_q_q_gauss(Rij,charges[i], charges[j], 1.25, 1.25)[1]  # sensible defaults
       Fs[i] -= JVec(fqq)
       Fs[j] += JVec(fqq)
-      fqμ = force_q_μ(Rij, charges[i], dipoles[j], λ)[1]
+      fqμ = force_q_μ(Rij, charges[i], dipoles[j], 0.35, 4.5)[1]  # sensible defaults
       Fs[i] -= JVec(fqμ)
       Fs[j] += JVec(fqμ)
-      fqμ = force_q_μ(-1.0 .* Rij, charges[j], dipoles[i], λ)[1]
+      fqμ = force_q_μ(-1.0 .* Rij, charges[j], dipoles[i], 0.35, 4.5)[1]  # sensible defaults
       Fs[i] += JVec(fqμ)
       Fs[j] -= JVec(fqμ)
-      fμμ = force_μ_μ(Rij, dipoles[i], dipoles[j], λ)[1]
+      fμμ = force_μ_μ(Rij, dipoles[i], dipoles[j], 0.35, 5.0)[1]  # sensible defaults
       Fs[i] -= JVec(fμμ)
       Fs[j] += JVec(fμμ)    
     end
@@ -214,14 +214,14 @@ end
 Coulomb interaction between two Gaussian charge clouds
 """
 
-function gaus_coulomb(Rij::AbstractArray, q1::Real, q2::Real, σ1::Real, σ2::Real)
+function gauss_coulomb(Rij::AbstractArray, q1::Real, q2::Real, σ1::Real, σ2::Real)
   rij = dot(Rij, Rij)^0.5
   α = 1 / (2 * (σ1^2 + σ2^2))^0.5
   return q1 * q2 / (4*π*ϵ_0 * rij) * erf(α*rij) * e * 1e10
 end
 
 function force_q_q_gauss(Rij::AbstractArray, q1::Real, q2::Real, σ1::Real, σ2::Real)
-  return Zygote.gradient(r -> gaus_coulomb(r, q1, q2, σ1, σ2), Rij)
+  return Zygote.gradient(r -> gauss_coulomb(r, q1, q2, σ1, σ2), Rij)
 end
 
 """
