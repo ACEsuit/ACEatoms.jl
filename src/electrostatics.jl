@@ -86,20 +86,20 @@ function forces(V::ESPot, at::Atoms)
   for i = 1:length(at)
     for j = (i+1):length(at) 
       Rij = pos[i] - pos[j]
-      fqμ1 = force_q_μ(Rij, Qs[i], mus[j], 0.35, 4.5)  # -> (DRij, Dmu)
+      fqμ1 = force_q_μ(Rij, Qs[i], mus[j], 0.25, 7.0)  # -> (DRij, Dmu)
       Fs[i] -= fqμ1[1]
       Fs[j] += fqμ1[1]
       fs[j] += fqμ1[2]
-      fqμ2 = force_q_μ(-1.0 .* Rij, Qs[j], mus[i], 0.35, 4.5)
+      fqμ2 = force_q_μ(-1.0 .* Rij, Qs[j], mus[i], 0.25, 7.0)
       Fs[i] += fqμ2[1]
       Fs[j] -= fqμ2[1]
       fs[i] += fqμ2[2]
-      fμμ = force_μ_μ(Rij, mus[i], mus[j], 0.35, 5.0)
+      fμμ = force_μ_μ(Rij, mus[i], mus[j], 0.25, 7.0)
       Fs[i] -= fμμ[1]
       Fs[j] += fμμ[1]  
       fs[i] += fμμ[2]
       fs[j] += fμμ[3]
-      fqq = force_q_q_gauss(Rij, Qs[i], Qs[j], 1.25, 1.25)[1]
+      fqq = force_q_q_gauss(Rij, Qs[i], Qs[j], 1.5, 1.5)[1]
       Fs[i] -= fqq
       Fs[j] += fqq
     end 
@@ -157,10 +157,10 @@ function electrostatic_energy(pos::AbstractArray, charges::AbstractArray, dipole
   for (i, R) in enumerate(pos)
     for j = (i+1):length(pos)
       Rij = R - pos[j]
-      qq += gauss_coulomb(Rij, charges[i], charges[j], 1.25, 1.25)  # sensible defaults
-      qμ += soft_q_μ(Rij, charges[i], dipoles[j], 0.35, 4.5)  # sensible defaults
-      qμ += soft_q_μ(-1.0 .* Rij, charges[j], dipoles[i], 0.35, 4.5)  # sensible defaults 
-      μμ += soft_μ_μ(Rij, dipoles[i], dipoles[j], 0.35, 5.0)  # sensible defaults 
+      qq += gauss_coulomb(Rij, charges[i], charges[j], 1.5, 1.5)  # sensible defaults
+      qμ += soft_q_μ(Rij, charges[i], dipoles[j], 0.25, 7.0)  # sensible defaults
+      qμ += soft_q_μ(-1.0 .* Rij, charges[j], dipoles[i], 0.25, 7.0)  # sensible defaults 
+      μμ += soft_μ_μ(Rij, dipoles[i], dipoles[j], 0.25, 7.0)  # sensible defaults 
     end
   end
   return qq + qμ + μμ
@@ -177,16 +177,16 @@ function electrostatic_forces(pos::AbstractArray, charges::AbstractArray, dipole
   for (i, R) in enumerate(pos)
     for j = (i+1):length(pos)
       Rij = R - pos[j]
-      fqq = force_q_q_gauss(Rij,charges[i], charges[j], 1.25, 1.25)[1]  # sensible defaults
+      fqq = force_q_q_gauss(Rij,charges[i], charges[j], 1.5, 1.5)[1]  # sensible defaults
       Fs[i] -= JVec(fqq)
       Fs[j] += JVec(fqq)
-      fqμ = force_q_μ(Rij, charges[i], dipoles[j], 0.35, 4.5)[1]  # sensible defaults
+      fqμ = force_q_μ(Rij, charges[i], dipoles[j], 0.25, 7.0)[1]  # sensible defaults
       Fs[i] -= JVec(fqμ)
       Fs[j] += JVec(fqμ)
-      fqμ = force_q_μ(-1.0 .* Rij, charges[j], dipoles[i], 0.35, 4.5)[1]  # sensible defaults
+      fqμ = force_q_μ(-1.0 .* Rij, charges[j], dipoles[i], 0.25, 7.0)[1]  # sensible defaults
       Fs[i] += JVec(fqμ)
       Fs[j] -= JVec(fqμ)
-      fμμ = force_μ_μ(Rij, dipoles[i], dipoles[j], 0.35, 5.0)[1]  # sensible defaults
+      fμμ = force_μ_μ(Rij, dipoles[i], dipoles[j], 0.25, 7.0)[1]  # sensible defaults
       Fs[i] -= JVec(fμμ)
       Fs[j] += JVec(fμμ)    
     end
