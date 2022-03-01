@@ -158,9 +158,10 @@ function ACE.set_params!(V::ACESitePotential, c::AbstractVector)
 end
 
 function ACE.scaling(V::ACESitePotentialBasis, p)
-   scal = Vector{Float64}[]
-   for model in V.models
-       scal = vcat(scal, ACE.scaling(model[2], p))
+   inds = _get_basisinds(V)
+   scal = Vector{Float64}(undef, ACE.nparams(V))
+   for (z, model) in V.models
+      scal[inds[z]] .= ACE.scaling(model, p)
    end
    return scal
 end
