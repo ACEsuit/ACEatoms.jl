@@ -72,8 +72,10 @@ end
 
 function _get_basisinds(V::ACESitePotential)
    inds = Dict{AtomicNumber, UnitRange{Int}}()
+   zz = sort(collect(keys(V.models)))
    i0 = 0
-   for (z, mo) in V.models
+   for z in zz
+      mo = V.models[z]
       len = length(mo.basis)
       inds[z] = (i0+1):(i0+len)   # to generalize for general models
       i0 += len
@@ -81,16 +83,8 @@ function _get_basisinds(V::ACESitePotential)
    return inds 
 end
 
-function _get_basisinds(V::ACEatoms.ACESitePotentialBasis)
-   inds = Dict{AtomicNumber, UnitRange{Int}}()
-   i0 = 0
-   for (z, mo) in V.models
-      len = length(mo)
-      inds[z] = (i0+1):(i0+len)   # to generalize for general models
-      i0 += len
-   end
-   return inds 
-end
+_get_basisinds(V::ACEatoms.ACESitePotentialBasis) = V.inds
+
 
 function basis(V::ACESitePotential{ENV}) where ENV 
    models = Dict( [sym => model.basis for (sym, model) in V.models]... )
