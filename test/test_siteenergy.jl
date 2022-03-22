@@ -83,7 +83,8 @@ println_slim(@test JuLIP.Testing.fdtest(V, at))
 @info("Check also the ACESitePotentialBasis interface")
 
 ipbasis = ACEatoms.basis(V)
-cc = [cTi; cAl]
+# convention is that z_Al < z_Ti hence this ordering 
+cc = [cAl; cTi]
 
 # check get_params, set_params
 

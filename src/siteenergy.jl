@@ -72,14 +72,19 @@ end
 
 function _get_basisinds(V::ACESitePotential)
    inds = Dict{AtomicNumber, UnitRange{Int}}()
+   zz = sort(collect(keys(V.models)))
    i0 = 0
-   for (z, mo) in V.models
+   for z in zz
+      mo = V.models[z]
       len = length(mo.basis)
       inds[z] = (i0+1):(i0+len)   # to generalize for general models
       i0 += len
    end
    return inds 
 end
+
+_get_basisinds(V::ACEatoms.ACESitePotentialBasis) = V.inds
+
 
 function basis(V::ACESitePotential{ENV}) where ENV 
    models = Dict( [sym => model.basis for (sym, model) in V.models]... )
@@ -139,6 +144,7 @@ end
                 
 
 ACE.nparams(V::ACESitePotential) = sum(ACE.nparams, values(V.models))
+ACE.nparams(V::ACEatoms.ACESitePotentialBasis) = length(V)
 
 function ACE.params(V::ACESitePotential) 
    inds = _get_basisinds(V)
@@ -155,4 +161,13 @@ function ACE.set_params!(V::ACESitePotential, c::AbstractVector)
       ACE.set_params!(V.models[z], c[inds[z]])
    end
    return V
+end
+
+function ACE.scaling(V::ACESitePotentialBasis, p)
+   inds = _get_basisinds(V)
+   scal = Vector{Float64}(undef, ACE.nparams(V))
+   for (z, model) in V.models
+      scal[inds[z]] .= ACE.scaling(model, p)
+   end
+   return scal
 end
