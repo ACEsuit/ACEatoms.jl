@@ -1,5 +1,4 @@
 
-
 using ACE.Random: rand_radial, rand_sphere
 using ACE: ACEConfig, State 
 using ACE.Utils: BondBasisSelector, RnYlm_1pbasis
@@ -79,6 +78,7 @@ function rand_ACEConfig_pop(B1p, Nat::Integer)
 end
 
 
+
 #isym=:be, bond_weight = 1.0, env_weight = 1.0)
 function SymmetricBondSpecies_basis(ϕ::ACE.AbstractProperty, env::ACE.BondEnvelope, Bsel::ACE.SparseBasis; species = nothing, RnYlm = nothing, kwargs...)
    BondSelector =  BondBasisSelector(Bsel; kwargs...)
@@ -95,4 +95,19 @@ function SymmetricBondSpecies_basis(ϕ::ACE.AbstractProperty, env::ACE.BondEnvel
    Bc = ACE.Categorical1pBasis([:bond, :env]; varsym = :be, idxsym = :be )
    B1p = Zμ * Bc * RnYlm * env
    return ACE.SymmetricBasis(ϕ, B1p, BondSelector)
+end
+
+function pair_basis(; species = :X,
+   # transform parameters
+   r0 = 2.5,
+   trans = PolyTransform(2, r0),
+   # degree parameters
+   maxdeg = 8,
+   # radial basis parameters
+   rcut = 5.0,
+   rin = 0.5 * r0,
+   pcut = 2,
+   pin = 0,
+   rbasis = transformed_jacobi(maxdeg, trans, rcut, rin; pcut=pcut, pin=pin))
+   return PolyPairBasis(rbasis, species)
 end

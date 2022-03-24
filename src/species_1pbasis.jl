@@ -53,8 +53,11 @@ degree(b, basis::AbstractSpecies1PBasis, args...) = 0
 
 get_index(basis::Species1PBasis, b) = z2i(basis.zlist, AtomicNumber(b.μ))
 
-ACE.get_spec(basis::Species1PBasis, i::Integer) = (mu = basis.zlist.list[i],)
-ACE.get_spec(basis::Species1PBasis) = ACE.get_spec.(basis, 1:length(basis))
+ACE.get_spec(basis::Species1PBasis, i::Integer) = (μ = basis.zlist.list[i],)
+ACE.get_spec(basis::Species1PBasis) = ACE.get_spec.(Ref(basis), 1:length(basis))
+
+ACE._scaling_absvalue(x::AtomicNumber) = 0
+
 
 Base.rand(basis::AbstractSpecies1PBasis) = rand(basis.zlist.list)
 

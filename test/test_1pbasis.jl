@@ -8,6 +8,8 @@ using ACEbase.Testing
 using ACE: evaluate, evaluate_d
 using StaticArrays
 
+
+
 inc_env(env, Us) = ACEConfig(env.Xs .+ Us)
 notdot(a, b) = sum(notdot.(a, b))
 notdot(a::Number, b::Number) = a * b
@@ -20,8 +22,8 @@ B1p = ACEatoms.ZμRnYlm_1pbasis(; maxdeg = 10, species = [:C,:O])
 env = rand_ACEConfig(B1p, Nat)
 A1 = ACE.evaluate(B1p, env)
 A, dA = ACE.evaluate_ed(B1p, env)
-println(@test(A ≈ A1))
-println(@test(size(dA) == (length(A), Nat)))
+println_slim(@test(A ≈ A1))
+println_slim(@test(size(dA) == (length(A), Nat)))
 
 ##
 
@@ -34,11 +36,11 @@ ACE.init1pspec!(B1p, Bsel)
 env = rand_ACEConfig_pop(B1p_pop, Nat)
 A_pop = ACE.evaluate(B1p_pop, env)
 A = ACE.evaluate(B1p, env)
-println(@test length(A) == length(A_pop))
+println_slim(@test length(A) == length(A_pop))
 
 # manual implementation: 
 A1 = sum( evaluate(B1p, X) * X.pop for X in env.Xs )
-println(@test(A1 ≈ A_pop))
+println_slim(@test(A1 ≈ A_pop))
 
 ##
 @info("Range of finite difference tests")

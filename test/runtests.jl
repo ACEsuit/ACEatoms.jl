@@ -18,4 +18,6 @@ using Test
    # ---------------------- 
    #  special physics 
    @testset "Electrostatics" begin include("test_electro.jl") end 
+   @testset "Dipoles" begin include("test_dip.jl") end 
+
 end
