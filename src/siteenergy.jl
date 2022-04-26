@@ -15,7 +15,8 @@ cutoff(basis::ACE.PIBasis) = cutoff(basis.basis1p)
 cutoff(B1p::ACE.Product1pBasis) = minimum(cutoff.(B1p.bases))
 
 cutoff(B1p::OneParticleBasis) = Inf
-cutoff(Rn::ACE.Rn1pBasis) = cutoff(Rn.R)
+
+cutoff(Rn::ACE.B1pComponent) = Rn.meta["rcut"]::Float64
 
 # already defined in pair potentials 
 # cutoff(Rn::ACE.OrthPolys.TransformedPolys) = Rn.ru
