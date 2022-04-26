@@ -29,8 +29,7 @@ _rand_atstate(mu0, Zμ, Rn) =
 
 function rand_ACEConfig(B1p, Nat::Integer)
    @assert Set((:μ, :n, :l, :m)) == Set(ACE.symbols(B1p))
-   Rn = B1p.bases[2]
-   @assert Rn isa ACE.Rn1pBasis
+   Rn = B1p["Rn"]
    Zμ = B1p.bases[1] 
    @assert Zμ isa Species1PBasis
    
@@ -65,8 +64,7 @@ _rand_atstate(mu0, Zμ, Rn, Pop) =
 
 function rand_ACEConfig_pop(B1p, Nat::Integer)
    @assert Set((:μ, :n, :l, :m, :P)) == Set(ACE.symbols(B1p))
-   Rn = B1p.bases[3]
-   @assert Rn isa ACE.Rn1pBasis
+   Rn = B1p["Rn"]
    Zμ = B1p.bases[2] 
    @assert Zμ isa Species1PBasis
    Pop = B1p.bases[1] 
