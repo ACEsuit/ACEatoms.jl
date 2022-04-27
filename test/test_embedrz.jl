@@ -42,21 +42,26 @@ evaluate_d(Rnl, X)
 
 @info("check correct application of the embedding, correctness of `evaluate`")
 for ntest = 1:30 
+   local X 
    X = rand_X()
    print_tf(@test(embeddings[X.mu] * evaluate(Qn, norm(X.rr)) ≈ evaluate(Rnl, X)))
 end
+println()
 
 ##
 
 using ACEbase.Testing: fdtest 
 @info("Finite difference test")
 for ntest = 1:30 
+   local X, F
+   X = rand_X()
    u = randn(length(Rnl))
    dX = ACE.DState( rr = ACE.rand_sphere() )
    F = t -> dot(u, evaluate(Rnl, X + t * dX))
    dF = t -> (g = evaluate_d(Rnl, X + t * dX);  dot(dX.rr, sum(u[n] * g[n].rr for n = 1:length(g)))) 
    print_tf(@test( fdtest(F, dF, 0.0; verbose=false) ))
 end
+println()
 
 ##
 

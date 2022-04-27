@@ -24,4 +24,7 @@ JuLIP._usethreads[] = false
    @testset "Electrostatics" begin include("test_electro.jl") end 
    @testset "Dipoles" begin include("test_dip.jl") end 
 
+
+   @testset "Embedding" begin include("test_embedrz.jl") end 
+
 end

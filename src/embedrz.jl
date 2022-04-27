@@ -94,3 +94,7 @@ function evaluate_ed(basis::EmbedRZ, r_μ::Tuple{<: AbstractFloat, Symbol})
    return uP, udP 
 end
 
+ACE.valtype(::EmbedRZ{TPR, T}) where {TPR, T} = T 
+
+ACE.valtype(::EmbedRZ{TPR, T}, ::Tuple{S, Symbol}) where {TPR, T, S} = promote_type(T, S) 
+
