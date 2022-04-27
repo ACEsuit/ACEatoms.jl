@@ -29,4 +29,6 @@ include("siteenergy.jl")
 
 include("dipole.jl")
 
+include("embedrz.jl")
+
 end

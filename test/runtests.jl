@@ -1,5 +1,7 @@
 using ACEatoms
 using Test
+using JuLIP 
+JuLIP._usethreads[] = false 
 
 ##
 

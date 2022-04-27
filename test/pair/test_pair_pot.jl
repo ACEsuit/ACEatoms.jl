@@ -58,6 +58,35 @@ println(@test energy(V, at) ≈ sum(V.coeffs .*  energy(pB, at)))
 println(@test _frcerr(forces(V, at), sum(coeffs .* forces(pB, at))) < 1e-12)
 
 ##
+
+# frcs = [] 
+# frcsb = [] 
+# for n = 1:10 
+#    push!(frcsb, sum(coeffs .* forces(pB, at)))
+#    push!(frcs, forces(V, at))
+# end
+
+# ##
+# all( frcs[n] == frcs[1] for n = 2:length(frcs) )
+# frc_errs = [ _frcerr(frcs[n], frcs[1]) for n = 2:length(frcs) ]
+# @show frc_errs
+
+# # [ _frcerr(frcsb[n], frcsb[1]) for n = 2:length(frcs) ]
+
+# ##
+# vv = [] 
+# for n = 1:10 
+#    push!(vv, virial(V, at))
+# end
+
+# ##
+# all( frcs[n] == frcs[1] for n = 2:length(frcs) )
+# errs = [ norm(vv[n] - vv[1]) for n = 2:length(frcs) ]
+# @show errs 
+
+
+##
+
 @info("   test (de-)dictionisation")
 @warn(" turned off failing FIO tests")
 # println(@test all(JuLIP.Testing.test_fio(V)))
