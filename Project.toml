@@ -16,7 +16,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
-ACE = "=0.12.37"
+ACE = "=0.12.38"
 JuLIP = "0.13.3"
 StaticArrays = "1.0"
 julia = "1.6"
