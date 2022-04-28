@@ -7,6 +7,8 @@ import ACE: SList, i2val, val2i, get_spec, symbols, indexrange, get_index, degre
 
 using ACE: @λ, chain, GetNorm, B1pComponent
 
+const SymOrAtnum = Union{Symbol, AtomicNumber}
+
 # ---------------------------------------------------------------------------
 # this is a bit of a nasty hack, still need to figure out how to do this 
 # in a more systematic way
@@ -75,7 +77,7 @@ function embedrz(Pr,
 end
 
 
-function evaluate(basis::EmbedRZ, r_μ::Tuple{<: AbstractFloat, Symbol})
+function evaluate(basis::EmbedRZ, r_μ::Tuple{<: AbstractFloat, SymOrAtnum})
    r, μ = r_μ
    P = evaluate(basis.Pr, r)
    uP = basis.embeddings[μ] * P 
@@ -84,7 +86,7 @@ function evaluate(basis::EmbedRZ, r_μ::Tuple{<: AbstractFloat, Symbol})
 end
 
 
-function evaluate_ed(basis::EmbedRZ, r_μ::Tuple{<: AbstractFloat, Symbol})
+function evaluate_ed(basis::EmbedRZ, r_μ::Tuple{<: AbstractFloat, SymOrAtnum})
    r, μ = r_μ
    P, dP = evaluate_ed(basis.Pr, r)
    uP = basis.embeddings[μ] * P 
@@ -96,5 +98,4 @@ end
 
 ACE.valtype(::EmbedRZ{TPR, T}) where {TPR, T} = T 
 
-ACE.valtype(::EmbedRZ{TPR, T}, ::Tuple{S, Symbol}) where {TPR, T, S} = promote_type(T, S) 
-
+ACE.valtype(::EmbedRZ{TPR, T}, ::Tuple{S, SymOrAtnum}) where {TPR, T, S} = promote_type(T, S) 
