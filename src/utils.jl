@@ -50,7 +50,7 @@ function PopZμRnYlm_1pbasis(; init = true, species = nothing, maxdeg = nothing,
    RnYlm = ACE.Utils.RnYlm_1pbasis(; maxdeg=maxdeg, maxL=maxL, Bsel = Bsel, kwargs...)
    Zμ = Species1PBasis(species)
    Pop = Pop1PBasis()
-   B1p = Pop * Zμ * RnYlm
+   B1p = ACE.Product1pBasis( (Pop, Zμ, RnYlm.bases...) )
    if init 
       ACE.init1pspec!(B1p, Bsel)
    end
@@ -67,8 +67,7 @@ function rand_ACEConfig_pop(B1p, Nat::Integer)
    Rn = B1p["Rn"]
    Zμ = B1p.bases[2] 
    @assert Zμ isa Species1PBasis
-   Pop = B1p.bases[1] 
-   @assert Pop isa Pop1PBasis
+   Pop = B1p["Pop"]
    
    mu0 = rand(Zμ)
    Xs = [ _rand_atstate(mu0, Zμ, Rn, Pop) for _ = 1:Nat ]

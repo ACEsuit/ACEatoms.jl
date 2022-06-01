@@ -41,6 +41,7 @@ for ntest = 1:30
                          r0 + rand() * (rcut - r0); 
                          verbose=false))
 end
+println() 
 
 ##
 
@@ -89,8 +90,7 @@ println(@test _frcerr(forces(V, at), sum(coeffs .* forces(pB, at))) < 1e-12)
 ##
 
 @info("   test (de-)dictionisation")
-@warn(" turned off failing FIO tests")
-# println(@test all(JuLIP.Testing.test_fio(V)))
+println(@test all(JuLIP.Testing.test_fio(V; warntype=false)))
 
 @info("      check that PolyPairBasis ≈ PolyPairPot")
 for ntest = 1:10

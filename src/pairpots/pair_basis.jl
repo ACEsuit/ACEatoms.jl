@@ -8,13 +8,11 @@ import ACEbase: valtype, acquire_B!, acquire_dB!,
 
 # TODO: allow PairBasis with different Pr for each z, z' combination
 
-function pairbasis(species, maxdeg::Integer, rcut, trans; pcut = 2)
+function pairbasis(species, maxdeg::Integer, rcut::Real, trans; pcut = 2)
    Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = pcut)
-   # Pr is now a chain ...
-   len = length(Pr.F[end])
+   # Pr is now a chain ... but nothing much else has changed
    zlist = ZList(species; static=true)
-   bidx0 = get_bidx0(Pr, zlist)
-   return PolyPairBasis(Pr, zlist, bidx0, len, rcut)
+   return PolyPairBasis(Pr, zlist, rcut)
 end
 
 struct PolyPairBasis{TJ, NZ} <: IPBasis
@@ -24,6 +22,15 @@ struct PolyPairBasis{TJ, NZ} <: IPBasis
    len::Int
    rcut::Float64 
 end
+
+function PolyPairBasis(Pr, zlist::SZList, rcut::Real)
+   len = length(Pr.F[end])
+   bidx0 = get_bidx0(Pr, zlist)
+   return PolyPairBasis(Pr, zlist, bidx0, len, rcut)
+end
+
+PolyPairBasis(J, species, len::Integer, rcut::Real) = 
+   PolyPairBasis( J, SZList(species; static=true), len, rcut)
 
 valtype(pB::PolyPairBasis, args...) = valtype(pB.J)
 
@@ -46,12 +53,6 @@ function scaling(pB::PolyPairBasis, p)
    return ww
 end
 
-PolyPairBasis(J, species, len, rcut) = 
-   PolyPairBasis( J, ZList(species; static=true), len, rcut)
-
-PolyPairBasis(J, zlist::SZList, rcut) =
-   PolyPairBasis(J, zlist, get_bidx0(J, zlist), len, rcut)
-
 function get_bidx0(J, zlist::SZList{NZ}) where {NZ}
    NJ = length(J)
    bidx0 = fill(zero(Int), (NZ, NZ))
@@ -73,20 +74,14 @@ JuLIP.cutoff(pB::PolyPairBasis) = pB.rcut
 write_dict(pB::PolyPairBasis) = Dict(
       "__id__" => "ACE_PolyPairBasis",
           "Pr" => write_dict(pB.J),
-       "zlist" => write_dict(pB.zlist) )
+       "zlist" => write_dict(pB.zlist), 
+       "rcut" => pB.rcut, )
 
 read_dict(::Val{:ACE_PolyPairBasis}, D::Dict) =
-      PolyPairBasis( read_dict(D["Pr"]), read_dict(D["zlist"]) )
+      PolyPairBasis( read_dict(D["Pr"]), 
+                     read_dict(D["zlist"]), 
+                     D["rcut"] ) 
 
-# alloc_temp(pB::PolyPairBasis, args...) = (
-#               J = alloc_B(pB.J),
-#           tmp_J = alloc_temp(pB.J)  )
-
-# alloc_temp_d(pB::PolyPairBasis, args...) =  (
-#              J = alloc_B( pB.J),
-#          tmp_J = alloc_temp(pB.J),
-#             dJ = alloc_dB(pB.J),
-#         tmpd_J = alloc_temp_d(pB.J)  )
 
 """
 compute the zeroth index of the basis corresponding to the potential between

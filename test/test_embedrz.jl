@@ -3,7 +3,7 @@ using ACE, ACEatoms, JuLIP, LinearAlgebra, ACEbase, Test
 using ACEatoms: AtomState
 using ACEbase.Testing
 using ACE: evaluate, evaluate_d, State
-using ACE: @λ
+using ACE: λ
 using StaticArrays
 using ACEatoms: embed_nl_spec1, embedrz
 
@@ -13,7 +13,7 @@ using ACEatoms: embed_nl_spec1, embedrz
 maxdeg = 10
 r0 = 1.0
 rcut = 3.0
-trans = @λ r -> 2/(1+r)
+trans = λ("r -> 2/(1+r)")
 Qn = ACE.transformed_jacobi(maxdeg, trans, rcut)
 # this is a bad temporary hack, I need to figure out a way to get this 
 # more easily ... it's all happening, just needs a bit of time.

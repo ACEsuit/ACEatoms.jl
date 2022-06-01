@@ -1,68 +1,29 @@
-import ACE: OneParticleBasis, AbstractState, Scal1pBasis, VectorPool
-import ACE.OrthPolys: TransformedPolys, transformed_jacobi
-import ACE.Transforms: IdTransform 
-import NamedTupleTools
-using NamedTupleTools: namedtuple
+import ACE: B1pComponent
+import ACE: evaluate, evaluate_d, evaluate_ed, GetVal
 
 export Pop1PBasis
 
+
 @doc raw"""
-`struct Pop1PBasis <: OneParticleBasis`
+`Pop1PBasis():` Generates a one-particle basis component similar to Scal1pBasis, but it has always length 1 such that P(x) = x. 
 
-One-particle basis similar to Scal1pBasis, but it has always length 1 such that P(x) = x
+TODO: This is really a multiplier rather than a basis and should be implemented as such. For now we keep this for the sake of compatibility. 
 """
-mutable struct Pop1PBasis <: OneParticleBasis{Float64}
-  # P::TransformedPolys
+function Pop1PBasis(xsym = :pop, isym::Symbol = :P, label = "Pop")
+  spec = [ NamedTuple{(isym,)}((1,)), ]
+  degrees = [ 0, ]
+  Bin = PopX()
+  B = B1pComponent(Bin, GetVal{xsym}(), spec, degrees, "Pop")
 end
 
-symbols(basis::Pop1PBasis) = [:P]
+struct PopX end
 
-indexrange(basis::Pop1PBasis) = Dict( :P => 1:1 ) # Dict( :P => 1:length(basis) )
+evaluate(::PopX, x) = [x,]
 
-isadmissible(b, basis::Pop1PBasis) = (b.P == 1) # (1 <= b.P <= length(basis))
+evaluate_d(::PopX, x::T) where {T} = [ one(T), ]
 
-get_index(basis::Pop1PBasis, b) = 1
+evaluate_ed(::PopX, x::T) where {T} = [x,], [ one(T), ]
 
-#function Pop1PBasis() #(num_basis::Int)
-  #P = transformed_jacobi(num_basis, IdTransform(), 120.0, 0.0)
-#  return Pop1PBasis(P)
-#end
+write_dict(V::PopX) = Dict( "__id__" => "ACE_PopX")
 
-Base.length(basis::Pop1PBasis) = 1  # length(basis.P)
-
-_val(X::AbstractState, basis::Pop1PBasis) = X.pop
-
-# Dict(:C => (4.0, 7.0), :H => (0.0, 2.0))
-
-# (x-(a+b)/2)/(b-a)
-
-ACE.valtype(basis::Pop1PBasis, args...) = Float64
-
-ACE.gradtype(basis::Pop1PBasis, X::AbstractState) = ACE.dstate_type(valtype(basis, X), X)
-
-
-function ACE.evaluate!(B, basis::Pop1PBasis, x::Number)
-  B[1] = x 
-  return B
-  #return evaluate!(B, basis.P, x)
-end
-
-function ACE.evaluate!(B, basis::Pop1PBasis, X::AbstractState)
-  return evaluate!(B, basis, _val(X, basis)) 
-end
-
-function ACE.evaluate_ed!(B, dB, basis::Pop1PBasis, X::AbstractState)
-   evaluate!(B, basis, X) 
-   dB[1] = zero(eltype(dB))
-   return B, dB 
-end
-
-
-degree(b, basis::Pop1PBasis, args...) = 0 #degree(basis.P)
-
-write_dict(V::Pop1PBasis) = 
-      Dict( "__id__" => "ACE_Pop1PBasis")
-
-function read_dict(::Val{:ACE_Pop1PBasis}, D::Dict) 
-   return Pop1PBasis()
-end
+read_dict(::Val{:ACE_PopX}, D::Dict) = Pop1PBasis()

@@ -5,7 +5,7 @@ import ACE, ACEbase
 import ACE: SList, i2val, val2i, get_spec, symbols, indexrange, get_index, degree, 
             evaluate, evaluate_d, evaluate_ed 
 
-using ACE: @λ, chain, GetNorm, B1pComponent
+using ACE: λ, chain, GetNorm, B1pComponent
 
 const SymOrAtnum = Union{Symbol, AtomicNumber}
 

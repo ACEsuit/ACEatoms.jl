@@ -39,6 +39,10 @@ EmbedCat1pBasis(categories::SList{LEN, TCAT}, embed::Vector{Vector{T}},
                 varsym::Symbol, isym::Symbol, label::String) where {LEN, TCAT, T} = 
       EmbedCat1pBasis{varsym, isym, LEN, TCAT, T}(categories, embed, label)
 
+evaluate(basis::EmbedCat1pBasis, X::AbstractState) = 
+      evaluate!(Vector{_valtype(basis)}(undef, length(basis)), basis, X)
+
+
 function ACE.evaluate!(A, basis::EmbedCat1pBasis, X::AbstractState)
    key = _val(X, basis)
    idx = val2i(basis.categories, key)
@@ -46,7 +50,7 @@ function ACE.evaluate!(A, basis::EmbedCat1pBasis, X::AbstractState)
    return A
 end
 
-ACE.valtype(::EmbedCat1pBasis{VSYM, ISYM, LEN, TCAT, T}, args...
+_valtype(::EmbedCat1pBasis{VSYM, ISYM, LEN, TCAT, T}, args...
            ) where {VSYM, ISYM, LEN, TCAT, T} = T
 
 symbols(basis::EmbedCat1pBasis) = [ _isym(basis), ]

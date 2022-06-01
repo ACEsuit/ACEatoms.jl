@@ -47,8 +47,7 @@ println(@test (length(F) == length(pB)) && all(length.(F) .==  length(at)))
 ##
 
 @info("test (de-)dictionisation of PairBasis")
-@warn("turned of failing FIO tests")
-# println(@test all(JuLIP.Testing.test_fio(pB)))
+println(@test all(JuLIP.Testing.test_fio(pB; warntype=false)))
 
 ##
 

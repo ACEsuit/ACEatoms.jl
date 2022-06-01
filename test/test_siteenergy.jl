@@ -36,8 +36,7 @@ V = ACEatoms.ACESitePotential(models)
 
 @info("Check FIO")
 using ACEbase.Testing: test_fio 
-@warn("turned off failing FIO test")
-# println_slim(@test(all(test_fio(V; warntype = false))))
+println_slim(@test(all(test_fio(V; warntype = false))))
 
 ##
 
@@ -66,13 +65,13 @@ energy(V, at)
 
 ##
 @info("Test that grad_config(model) ≈ evaluate_d(site-potential)")
+dv1 = ACE.grad_config(V.models[z0], env)
 dEs = zeros(JVecF, length(env))
-dv1 = ACE.grad_config!(dEs, V.models[z0], env)
 dv2 = JuLIP.evaluate_d!(dEs, nothing, V, Rs, Zs, z0)
 dv3 = evaluate_d(V, Rs, Zs, z0)
 
-println_slim(@test(dv1 ≈ dv2))
-println_slim(@test(dv1 ≈ dv3))
+println_slim(@test(dv2 ≈ dv3))
+println_slim(@test( all( dv1.rr ≈ dv2 for (dv1, dv2) in zip(dv1, dv2) )))
 
 forces(V, at)
 ##
