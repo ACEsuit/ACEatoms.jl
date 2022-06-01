@@ -101,7 +101,7 @@ function energy(pB::PolyPairBasis, at::Atoms{T}) where {T}
       r = norm(R)
       J = evaluate(pB.J, r)
       idx0 = _Bidx0(pB, at.Z[i], at.Z[j])
-      for n = 1:length(pB)
+      for n = 1:length(J)
          E[idx0 + n] += 0.5 * J[n]
       end
       ACE.release!(J)
@@ -115,7 +115,7 @@ function forces(pB::PolyPairBasis, at::Atoms{T}) where {T}
       r = norm(R)
       dJ = evaluate_d(pB.J, r)
       idx0 = _Bidx0(pB, at.Z[i], at.Z[j])
-      for n = 1:length(pB)
+      for n = 1:length(dJ)
          F[i, idx0 + n] += 0.5 * dJ[n] * (R/r)
          F[j, idx0 + n] -= 0.5 * dJ[n] * (R/r)
       end
@@ -130,7 +130,7 @@ function virial(pB::PolyPairBasis, at::Atoms{T}) where {T}
       r = norm(R)
       dJ = evaluate_d(pB.J, r)
       idx0 = _Bidx0(pB, at.Z[i], at.Z[j])
-      for n = 1:length(pB)
+      for n = 1:length(dJ)
          V[idx0 + n] -= 0.5 * (dJ[n]/r) * R * R'
       end
       ACE.release!(dJ)
