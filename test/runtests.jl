@@ -25,6 +25,7 @@ JuLIP._usethreads[] = false
    @testset "Dipoles" begin include("test_dip.jl") end 
 
 
-   @testset "Embedding" begin include("test_embedrz.jl") end 
+   @testset "z Embedding" begin include("test_embed1p.jl") end 
+   @testset "(r,z) Embedding" begin include("test_embedrz.jl") end 
 
 end

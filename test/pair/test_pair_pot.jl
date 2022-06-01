@@ -23,7 +23,7 @@ maxdeg = 8
 r0 = 1.0
 rcut = 3.0
 
-trans = PolyTransform(1, r0)
+trans = polytransform(1, r0)
 pB = pairbasis(:W, maxdeg, rcut, trans) 
 
 coeffs = randcoeffs(pB)
@@ -33,6 +33,7 @@ V = combine(pB, coeffs)
 
 @info("FD test for pair potential in r space")
 for ntest = 1:30 
+   local coeffs, V 
    coeffs = randcoeffs(pB)
    V = combine(pB, coeffs)
    print_tf(@test fdtest(r -> ACE.evaluate(V, r), 

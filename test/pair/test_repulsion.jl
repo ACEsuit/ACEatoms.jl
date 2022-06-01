@@ -26,7 +26,7 @@ z = atomic_number(:W)
 maxdeg = 8
 r0 = 1.0
 rcut = 3.0
-pB = pairbasis(:W, maxdeg, rcut, PolyTransform(1, r0))
+pB = pairbasis(:W, maxdeg, rcut, polytransform(1, r0))
 coeffs = randcoeffs(pB)
 V = combine(pB, coeffs)
 
@@ -59,7 +59,7 @@ at.Z[2:3:end] .= atomic_number(:Fe)
 rattle!(at, 0.03)
 r0 = rnn(:W)
 
-pB = pairbasis( [:W, :Fe], maxdeg, rcut, PolyTransform(1, r0) )
+pB = pairbasis( [:W, :Fe], maxdeg, rcut, polytransform(1, r0) )
    
 coeffs = randcoeffs(pB)
 V = combine(pB, coeffs)

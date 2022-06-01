@@ -22,7 +22,7 @@ maxdeg = 8
 r0 = 1.0
 rcut = 3.0
 
-trans = PolyTransform(1, r0)
+trans = polytransform(1, r0)
 
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
 pB = pairbasis(:W, maxdeg, rcut, trans)
