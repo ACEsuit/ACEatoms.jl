@@ -10,6 +10,8 @@ include("configs.jl")
 
 include("species_1pbasis.jl")
 
+include("embed1p.jl")
+
 include("pop_1pbasis.jl")
 
 include("pairpots/pair.jl")
