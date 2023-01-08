@@ -8,6 +8,7 @@ using ACE, JuLIP, ACEatoms, ACEbase, Test, LinearAlgebra
 using ACE: evaluate, evaluate_d, SymmetricBasis, SimpleSparseBasis, PIBasis
 using ACEbase.Testing: fdtest, println_slim 
 
+JuLIP._usethreads[] = false
 
 ##
 
@@ -64,13 +65,13 @@ energy(V, at)
 
 ##
 @info("Test that grad_config(model) ≈ evaluate_d(site-potential)")
+dv1 = ACE.grad_config(V.models[z0], env)
 dEs = zeros(JVecF, length(env))
-dv1 = ACE.grad_config!(dEs, V.models[z0], env)
 dv2 = JuLIP.evaluate_d!(dEs, nothing, V, Rs, Zs, z0)
 dv3 = evaluate_d(V, Rs, Zs, z0)
 
-println_slim(@test(dv1 ≈ dv2))
-println_slim(@test(dv1 ≈ dv3))
+println_slim(@test(dv2 ≈ dv3))
+println_slim(@test( all( dv1.rr ≈ dv2 for (dv1, dv2) in zip(dv1, dv2) )))
 
 forces(V, at)
 ##

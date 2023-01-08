@@ -26,9 +26,10 @@ include("siteenergy.jl")
 
 # DONT UNCOMMENT ANYTHING BELOW HERE FOR NOW!!!
 # include("ad.jl")
-
 # include("models/models.jl")
 
 include("dipole.jl")
+
+include("embedrz.jl")
 
 end

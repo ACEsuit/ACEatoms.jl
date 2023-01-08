@@ -15,7 +15,9 @@ cutoff(basis::ACE.PIBasis) = cutoff(basis.basis1p)
 cutoff(B1p::ACE.Product1pBasis) = minimum(cutoff.(B1p.bases))
 
 cutoff(B1p::OneParticleBasis) = Inf
-cutoff(Rn::ACE.Rn1pBasis) = cutoff(Rn.R)
+
+cutoff(Rn::ACE.B1pComponent) = 
+      haskey(Rn.meta, "rcut") ? Rn.meta["rcut"]::Float64 : Inf
 
 # already defined in pair potentials 
 # cutoff(Rn::ACE.OrthPolys.TransformedPolys) = Rn.ru
@@ -130,14 +132,22 @@ end
 
 function evaluate_d!(dV, _tmpd, V::ACESitePotential, Rs, Zs, z0) 
    env = environment(V, Rs, Zs, z0)
-   return ACE.grad_config!(dV, V.models[z0], env)
+   g = ACE.grad_config(V.models[z0], env)
+   for i = 1:length(g)
+      dV[i] = g[i].rr
+   end
+   ACE.release!(g)
+   return dV
 end
 
 function evaluate_d!(dB, _tmpd, V::ACESitePotentialBasis, Rs, Zs, z0)
    fill!(dB, zero(eltype(dB)))
    dBview = (@view dB[V.inds[z0], 1:length(Rs)])
    env = environment(V, Rs, Zs, z0)
-   evaluate_d!(dBview, V.models[z0], env)
+   g = evaluate_d(V.models[z0], env) 
+   for i = 1:length(g)
+      dBview[i] = g[i].rr
+   end
    return dBview
 end
 

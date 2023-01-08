@@ -8,7 +8,8 @@ import ACE: OneParticleBasis,
             degree,
             get_index
 
-import ACEbase: Discrete1pBasis
+import ACEbase: Discrete1pBasis, 
+            evaluate, evaluate_d, evaluate_ed 
 
 import JuLIP.Potentials: ZList, SZList, z2i, i2z
 
@@ -35,13 +36,15 @@ Species1PBasis(species) = Species1PBasis(ZList(species, static=true))
 
 Base.length(basis::AbstractSpecies1PBasis) = length(basis.zlist)
 
+
+evaluate(basis::Species1PBasis, X::AbstractState) = 
+      ACE.evaluate!(Vector{Bool}(undef, length(basis)), basis, X)
+
 function ACE.evaluate!(A, basis::Species1PBasis, X::AbstractState)
    fill!(A, false)
    A[z2i(basis.zlist, X.mu)] = true
    return A
 end
-
-ACE.valtype(::AbstractSpecies1PBasis, args...) = Bool
 
 symbols(::Species1PBasis) = [:μ]
 

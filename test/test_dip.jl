@@ -112,7 +112,7 @@ F_lammps = [4.98417434  -3.94540391  15.64287807]
 ##
 
 @info("test (de-)dictionisation of Dipole potential")
-println_slim(@test all(JuLIP.Testing.test_fio(Vtot)))
+println_slim(@test all(JuLIP.Testing.test_fio(Vtot; warntype=false)))
 
 ##
 

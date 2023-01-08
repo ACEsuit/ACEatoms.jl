@@ -1,5 +1,9 @@
 using ACEatoms
 using Test
+using JuLIP 
+JuLIP._usethreads[] = false 
+
+##
 
 @testset "ACEatoms.jl" begin
 
@@ -19,5 +23,9 @@ using Test
    #  special physics 
    @testset "Electrostatics" begin include("test_electro.jl") end 
    @testset "Dipoles" begin include("test_dip.jl") end 
+
+
+   @testset "z Embedding" begin include("test_embed1p.jl") end 
+   @testset "(r,z) Embedding" begin include("test_embedrz.jl") end 
 
 end

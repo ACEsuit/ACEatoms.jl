@@ -37,16 +37,16 @@ read_dict(::Val{:ACE_PolyPairPot}, D::Dict, T = read_dict(D["T"])) =
       PolyPairPot(read_dict(D["basis"]), T.(D["coeffs"]))
 
 
-alloc_temp(V::PolyPairPot{T}, N::Integer) where {T} =
-      ( R = zeros(JVec{T}, N),
-        Z = zeros(AtomicNumber, N),
-        J = acquire_B!(V.basis.J) )
+# alloc_temp(V::PolyPairPot{T}, N::Integer) where {T} =
+#       ( R = zeros(JVec{T}, N),
+#         Z = zeros(AtomicNumber, N),
+#         J = acquire_B!(V.basis.J) )
 
-alloc_temp_d(V::PolyPairPot{T}, N::Integer) where {T} =
-      ( dV = zeros(JVec{T}, N),
-         R = zeros(JVec{T}, N),
-         Z = zeros(AtomicNumber, N),
-         dJ = acquire_dB!(V.basis.J) )
+# alloc_temp_d(V::PolyPairPot{T}, N::Integer) where {T} =
+#       ( dV = zeros(JVec{T}, N),
+#          R = zeros(JVec{T}, N),
+#          Z = zeros(AtomicNumber, N),
+#          dJ = acquire_dB!(V.basis.J) )
 
 
 function _dot_zij(V, B, z, z0)
@@ -54,11 +54,19 @@ function _dot_zij(V, B, z, z0)
    return sum( V.coeffs[i0 + n] * B[n]  for n = 1:length(V.basis, z0) )
 end
 
-evaluate!(tmp, V::PolyPairPot, r::Number, z, z0) =
-      _dot_zij(V, evaluate!(tmp.J, V.basis.J, r), z, z0)
+function evaluate!(tmp, V::PolyPairPot, r::Number, z, z0)
+   J = evaluate(V.basis.J, r)
+   val = _dot_zij(V, parent(J), z, z0)
+   ACE.release!(J)
+   return val 
+end
 
-evaluate_d!(tmp, V::PolyPairPot, r::Number, z, z0) =
-      _dot_zij(V, evaluate_d!(tmp.dJ, V.basis.J, r), z, z0)
+function evaluate_d!(tmp, V::PolyPairPot, r::Number, z, z0)
+   dJ = evaluate_d(V.basis.J, r)
+   val = _dot_zij(V, parent(dJ), z, z0)
+   ACE.release!(dJ)
+   return val 
+end
 
 function evaluate!(tmp, V::PolyPairPot, r::Number)
    @assert numz(V) == 1
