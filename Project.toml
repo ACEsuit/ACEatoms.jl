@@ -19,7 +19,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 ACE = "=0.12.44"
 JuLIP = "0.13.3"
 StaticArrays = "1.0"
-julia = "1.6"
+julia = "1.7"
 
 [extras]
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
